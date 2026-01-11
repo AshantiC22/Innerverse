@@ -1,4 +1,5 @@
 #for step 1: the interpreter, we will install the library(from textblob import Textblob)
+#the link on using textblob and understanding how im going to use its polarity score. website link: https://textblob.readthedocs.io/en/dev/quickstart.html#quickstart
 from textblob import TextBlob
 '''
 we are going to buld a bridge between 'Text' and Action. In this file, I will need o think through these three steps:
