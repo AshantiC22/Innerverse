@@ -2,6 +2,7 @@
 #the link on using textblob and understanding how im going to use its polarity score. website link: https://textblob.readthedocs.io/en/dev/quickstart.html#quickstart
 from textblob import TextBlob
 from security import check_for_crisis#Go to the file named security.py, find the machine named check_for_crisis, and bring it here so I can use it in this file.
+from assessments import run_gad7, run_phq9#Go to the file named security.py, find the machine named check_for_crisis, and bring it here so I can use it in this file.
 '''
 we are going to buld a bridge between 'Text' and Action. In this file, I will need o think through these three steps:
 1. The Analysis:How do I take a sentence like "Im feeling really lonely today" and turn it into a number?
@@ -59,6 +60,23 @@ Now lets build the skeleton
 - we will create three "empty boxes or functions"
 -first we gotta install the textblob library: how I do it is "pip install -U textblob and then python -m textblob.download_corpora
 '''
+from assessments import run_gad7, run_phq9  # Import the new tools
+
+# A mock list to simulate 'History' (usually this comes from a database)
+mood_history = ["THUNDERSTORM", "STEADY RAIN"] 
+
+def check_for_assessment_trigger(current_weather):
+    """
+    Checks if the user has had 3 days of 'Heavy' weather.
+    """
+    mood_history.append(current_weather)
+    
+    # Check if the last 3 entries are either RAIN or THUNDERSTORM
+    heavy_weather_count = sum(1 for m in mood_history[-3:] if m in ["STEADY RAIN", "THUNDERSTORM"])
+    
+    if heavy_weather_count >= 3:
+        return True
+    return False
 
 def analyze_journal_entry(user_text):
     # We use TextBlob to get the raw polarity (-1 to 1)
@@ -161,3 +179,14 @@ if __name__ == "__main__":
         # 4. Show the result
         final_report = update_world_visual(weather, mood_score)
         print("\n" + final_report)
+
+    # 5. NEW: Check if we need a clinical deep-dive
+    if check_for_assessment_trigger(weather):
+        print("\n" + "!"*30)
+        print("NOTICE: The atmosphere has been heavy for a few days.")
+        print("Would you like to take a quick GAD-7 or PHQ-9 check-in?")
+        choice = input("Type 'YES' to start or 'NO' to continue: ").upper()
+        
+        if choice == 'YES':
+            # You can choose which one to run, or offer both
+            run_phq9()
