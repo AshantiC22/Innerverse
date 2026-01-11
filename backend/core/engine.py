@@ -1,6 +1,7 @@
 #for step 1: the interpreter, we will install the library(from textblob import Textblob)
 #the link on using textblob and understanding how im going to use its polarity score. website link: https://textblob.readthedocs.io/en/dev/quickstart.html#quickstart
 from textblob import TextBlob
+from security import check_for_crisis#Go to the file named security.py, find the machine named check_for_crisis, and bring it here so I can use it in this file.
 '''
 we are going to buld a bridge between 'Text' and Action. In this file, I will need o think through these three steps:
 1. The Analysis:How do I take a sentence like "Im feeling really lonely today" and turn it into a number?
@@ -107,6 +108,21 @@ if __name__ == "__main__":
     
     # 1. Get Input
     user_input = input("What thoughts are moving through your mind right now? ")
+    # 2. THE SAFETY INTERCEPTION (New!)
+    # We call the function we imported from security.py
+    is_crisis = check_for_crisis(user_input)
+
+    if is_crisis:
+        # If the security file says "True", we stop everything else.
+        print("\n🚨 SAFETY ALERT: Please reach out for support. Dial 988.")
+    else:
+        # 3. If safe, we proceed to the mood analysis
+        mood_score = analyze_journal_entry(user_input)
+        weather = translate_score_to_weather(mood_score)
+        
+        # 4. Show the result
+        final_report = update_world_visual(weather, mood_score)
+        print("\n" + final_report)
     
     # 2. Run Step 1 (The Analysis)
     mood_score = analyze_journal_entry(user_input)
