@@ -3,6 +3,7 @@
 from textblob import TextBlob
 from security import check_for_crisis#Go to the file named security.py, find the machine named check_for_crisis, and bring it here so I can use it in this file.
 from assessments import run_gad7, run_phq9#Go to the file named security.py, find the machine named check_for_crisis, and bring it here so I can use it in this file.
+from utils.interface import slow_print, slow_input, display_report
 '''
 we are going to buld a bridge between 'Text' and Action. In this file, I will need o think through these three steps:
 1. The Analysis:How do I take a sentence like "Im feeling really lonely today" and turn it into a number?
@@ -157,10 +158,10 @@ def analyze_structure(user_text):
 
 # --- The Main Gate ---
 if __name__ == "__main__":
-    print("--- Welcome to Innerverse ---")
+    slow_print("--- Welcome to Innerverse ---")
     
     # 1. Get Input
-    user_input = input("What thoughts are moving through your mind right now? ")
+    user_input = slow_input("What thoughts are moving through your mind right now? ")
     
     # 2. THE SAFETY INTERCEPTION
     # Make sure 'from security import check_for_crisis' is at the top of your file!
@@ -172,13 +173,14 @@ if __name__ == "__main__":
     else:
         # 3. If safe, we proceed to the mood analysis
         mood_score = analyze_journal_entry(user_input)
-        
-        # FIX: Pass BOTH mood_score and user_input here
         weather = translate_score_to_weather(mood_score, user_input)
         
-        # 4. Show the result
-        final_report = update_world_visual(weather, mood_score)
-        print("\n" + final_report)
+        # 4. Show the result using our new Rich UI
+        # Get the text description first
+        description = update_world_visual(weather, mood_score) 
+        
+        # Now pass it to the Rich display function
+        display_report(weather, mood_score, description)
 
     # 5. NEW: Check if we need a clinical deep-dive
     if check_for_assessment_trigger(weather):
