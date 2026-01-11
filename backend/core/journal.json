@@ -10,5 +10,17 @@
     {
         "weather": "STEADY RAIN",
         "score": -0.5
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.24
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": -1.5
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": -0.65
     }
 ]

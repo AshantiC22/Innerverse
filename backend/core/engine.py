@@ -188,7 +188,7 @@ if __name__ == "__main__":
         save_entry(weather, mood_score)
 
     # 5. NEW: Check if we need a clinical deep-dive
-    if check_for_assessment_trigger(weather):
+    if check_for_assessment_trigger():
         print("\n" + "!"*30)
         print("NOTICE: The atmosphere has been heavy for a few days.")
         print("Would you like to take a quick GAD-7 or PHQ-9 check-in?")
