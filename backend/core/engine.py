@@ -102,6 +102,23 @@ def update_world_visual(weather_type, score):
     message = f"Because your score was {score:.2f}, the Innerverse is now {weather_type}."
     return message
 
+def analyze_structure(user_text):
+    """
+    Analyzes the 'shape' of the writing to find stress patterns.
+    """
+    # 1. Count the words (Check for run-on sentences or frantic typing)
+    word_count = len(user_text.split())
+    
+    # 2. Check for "Spiraling" (Very long sentences without pauses)
+    # If a sentence has more than 40 words without a comma or period.
+    is_run_on = word_count > 40 and "," not in user_text and "." not in user_text
+
+    # 3. Check for "Frantic Punctuation" 
+    # (Multiple exclamation points like "!!!" or "???")
+    is_frantic = "!!!" in user_text or "???" in user_text
+
+    return is_run_on, is_frantic
+
 # --- The Main Gate ---
 if __name__ == "__main__":
     print("--- Welcome to Innerverse ---")
