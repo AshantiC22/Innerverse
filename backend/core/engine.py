@@ -4,6 +4,7 @@ from textblob import TextBlob
 from security import check_for_crisis#Go to the file named security.py, find the machine named check_for_crisis, and bring it here so I can use it in this file.
 from assessments import run_gad7, run_phq9#Go to the file named security.py, find the machine named check_for_crisis, and bring it here so I can use it in this file.
 from utils.interface import slow_print, slow_input, display_report
+from utils.storage import load_history, save_entry
 '''
 we are going to buld a bridge between 'Text' and Action. In this file, I will need o think through these three steps:
 1. The Analysis:How do I take a sentence like "Im feeling really lonely today" and turn it into a number?
@@ -66,18 +67,21 @@ from assessments import run_gad7, run_phq9  # Import the new tools
 # A mock list to simulate 'History' (usually this comes from a database)
 mood_history = ["THUNDERSTORM", "STEADY RAIN"] 
 
-def check_for_assessment_trigger(current_weather):
+def check_for_assessment_trigger(): # Removed current_weather parameter to pull from file instead
     """
-    Checks if the user has had 3 days of 'Heavy' weather.
+    Checks if the user has had 3 days of 'Heavy' weather in the saved history.
     """
-    mood_history.append(current_weather)
+    history = load_history() # Pull from your JSON storage
     
-    # Check if the last 3 entries are either RAIN or THUNDERSTORM
-    heavy_weather_count = sum(1 for m in mood_history[-3:] if m in ["STEADY RAIN", "THUNDERSTORM"])
+    if len(history) < 3:
+        return False
     
-    if heavy_weather_count >= 3:
-        return True
-    return False
+    # Check the last 3 entries in the list of dictionaries
+    # (Since save_entry saves a dictionary like {"weather": "RAIN", "score": -0.5})
+    last_three = history[-3:]
+    heavy_weather_count = sum(1 for entry in last_three if entry.get("weather") in ["STEADY RAIN", "THUNDERSTORM"])
+    
+    return heavy_weather_count >= 3
 
 def analyze_journal_entry(user_text):
     # We use TextBlob to get the raw polarity (-1 to 1)
@@ -171,16 +175,17 @@ if __name__ == "__main__":
         # If the security file says "True", we stop everything else.
         print("\n🚨 SAFETY ALERT: Please reach out for support. Dial 988.")
     else:
-        # 3. If safe, we proceed to the mood analysis
+        # 3. Proceed to analysis
         mood_score = analyze_journal_entry(user_input)
         weather = translate_score_to_weather(mood_score, user_input)
         
-        # 4. Show the result using our new Rich UI
-        # Get the text description first
+        # 4. Show result
         description = update_world_visual(weather, mood_score) 
-        
-        # Now pass it to the Rich display function
         display_report(weather, mood_score, description)
+
+        # --- THE MEMORY LINK ---
+        # Save this to your JSON file so it persists
+        save_entry(weather, mood_score)
 
     # 5. NEW: Check if we need a clinical deep-dive
     if check_for_assessment_trigger(weather):

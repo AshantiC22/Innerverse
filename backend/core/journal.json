@@ -1,0 +1,14 @@
+[
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.5
+    },
+    {
+        "weather": "FOGGY MIST",
+        "score": -0.1
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.5
+    }
+]
