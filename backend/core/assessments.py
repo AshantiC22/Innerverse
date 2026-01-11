@@ -58,8 +58,7 @@ def run_gad7():
 
 def run_phq9():
     """
-    Runs the 9-question depression screening.
-    Scoring: 0-4 Minimal, 5-9 Mild, 10-14 Moderate, 15-19 Mod. Severe, 20+ Severe.
+    Runs the 9-question depression screening with integrated safety protocols.
     """
     print("\n" + "═"*50)
     print("      PHQ-9: DEPRESSION SCREENING TOOL")
@@ -80,19 +79,60 @@ def run_phq9():
         "9. Thoughts that you would be better off dead, or hurting yourself"
     ]
 
-    score = _collect_scores(questions)
+    # --- MODIFIED COLLECTION ---
+    # We collect scores into a list so we can check Question 9 (index 8)
+    individual_scores = []
+    for q in questions:
+        while True:
+            try:
+                val = int(input(f"{q}: "))
+                if 0 <= val <= 3:
+                    individual_scores.append(val)
+                    break
+                else:
+                    print("⚠️  Please enter 0, 1, 2, or 3.")
+            except ValueError:
+                print("⚠️  Invalid input. Please enter a number.")
+
+    total_score = sum(individual_scores)
+    q9_score = individual_scores[8]  # This is the "Suicidal Ideas" question
 
     # Interpretation Logic
-    if score <= 4: result = "Minimal Depression"
-    elif score <= 9: result = "Mild Depression"
-    elif score <= 14: result = "Moderate Depression"
-    elif score <= 19: result = "Moderately Severe Depression"
+    if total_score <= 4: result = "Minimal Depression"
+    elif total_score <= 9: result = "Mild Depression"
+    elif total_score <= 14: result = "Moderate Depression"
+    elif total_score <= 19: result = "Moderately Severe Depression"
     else: result = "Severe Depression"
 
-    print(f"\nYour PHQ-9 Score: {score}")
+    print(f"\nYour PHQ-9 Score: {total_score}")
     print(f"Result: {result}")
-    return score, result
 
+    # --- THE SAFETY OVERRIDE ---
+    # Trigger 1: Any thoughts of self-harm (Q9 > 0)
+    # Trigger 2: Moderate to Severe Score (Total >= 10)
+    if q9_score > 0 or total_score >= 10:
+        print("\n" + "!"*60)
+        print("💡 IMPORTANT RECOMMENDATION:")
+        print("Based on your screening, it is recommended that you follow up")
+        print("with a crisis counselor or healthcare provider.")
+        
+        print("\n📞 REACH OUT FOR SUPPORT (24/7 Free & Confidential):")
+        print("• Call or Text: 988")
+        print("• 988 Lifeline Website: https://988lifeline.org")
+        print("• Chat Online: https://988lifeline.org/chat/")
+
+        if q9_score > 0:
+            print("\n🚨 SPECIFIC RESOURCE FOR SUICIDAL IDEATION:")
+            print("Since you noted thoughts of self-harm, please visit:")
+            print("👉 https://988lifeline.org/help-yourself/suicidal-thoughts/")
+        
+        if total_score >= 20:
+            print("\n🆘 URGENT: Your score is in the 'Severe' range.")
+            print("Please consider connecting to the 988 center immediately.")
+        
+        print("!"*60 + "\n")
+
+    return total_score, result
 
 
 # INTERNAL HELPER (The Input Machine)
