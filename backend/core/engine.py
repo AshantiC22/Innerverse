@@ -61,46 +61,64 @@ Now lets build the skeleton
 '''
 
 def analyze_journal_entry(user_text):
-    """
-    Step 1: The Interpreter
-    Takes the text, checks if it's empty, and returns the polarity score.
-    """
-    if user_text.strip() == "":
-        return None  # Return 'None' to signal an empty input
-    
-    # Create the 'Blob' from the user's text
+    # We use TextBlob to get the raw polarity (-1 to 1)
     blob = TextBlob(user_text)
+    sentiment = blob.sentiment.polarity
     
-    # Extract the polarity (the number between -1.0 and 1.0)
-    score = blob.sentiment.polarity
-    return score
+    # ADVANCED LOGIC: Check for 'Intensity Boosters'
+    # If the user uses ALL CAPS or '!!!', we amplify the score
+    if user_text.isupper() or "!!!" in user_text:
+        sentiment = sentiment * 1.5 # Boost the intensity
+        
+    return sentiment
 
-def translate_score_to_weather(score):
+def translate_score_to_weather(sentiment_score, user_text):
     """
-    Step 2: The Translator
-    Uses your State-Logic Table to turn a number into a weather string.
+    Refined Logic:
+    - Sentiment > 0.5: Radiant Sun (High Joy)
+    - Sentiment 0.1 to 0.5: Clear Skies (Content)
+    - Sentiment -0.1 to 0.1: Foggy/Mist (Neutral)
+    - Sentiment -0.1 to -0.5: Rain (Sad)
+    - Sentiment < -0.5: Thunderstorm (Distressed)
     """
-    if score is None:
-        return "Void"
-
-    # --- YOUR TASK: Use your If/Elif logic here ---
-    # Example:
-    if score >= 0.8:
-        return "Brightest Sunlight"
-    elif score >= 0.2:
-        return "Soft Golden Hour"
-    # ADD YOUR OTHER BUCKETS HERE (Neutral, Sadness, Distress)
+    
+    # We can also check for '!!!' here to boost the intensity
+    is_intense = "!" in user_text
+    
+    if sentiment_score > 0.5:
+        return "RADIANT SUN" if is_intense else "CLEAR SKIES"
+    elif 0.1 <= sentiment_score <= 0.5:
+        return "PARTLY CLOUDY"
+    elif -0.1 < sentiment_score < 0.1:
+        return "FOGGY MIST"
+    elif -0.5 <= sentiment_score <= -0.1:
+        return "STEADY RAIN"
     else:
-        return "Unknown Weather"
+        return "THUNDERSTORM"
 
-def update_world_visual(weather_type, score):
+def update_world_visual(weather, score):
     """
-    Step 3: The Reporter
-    Uses f-strings to tell the user what happened.
+    Creates a visual text-based 'scene' for the user based on their mood.
     """
-    # This is where we use the f-string tool you identified
-    message = f"Because your score was {score:.2f}, the Innerverse is now {weather_type}."
-    return message
+    # Header for the report
+    report = f"\n--- YOUR INNERVERSE REPORT (Score: {score:.2f}) ---\n"
+    
+    if weather == "RADIANT SUN":
+        scene = "☀️ ✨ 🌈\nTHE SKY IS GLOWING! Your energy is radiant and the world is wide open."
+    elif weather == "CLEAR SKIES":
+        scene = "☀️ 🌤️\nIt's a calm, bright day. Everything feels steady and manageable."
+    elif weather == "PARTLY CLOUDY":
+        scene = "⛅\nThere's a mix of light and shadow. You're finding your balance."
+    elif weather == "FOGGY MIST":
+        scene = "🌫️ 💭\nVisibility is low. It's okay not to have all the answers right now."
+    elif weather == "STEADY RAIN":
+        scene = "🌧️ 💧\nThe clouds are releasing weight. Take this time to rest and reflect."
+    elif weather == "THUNDERSTORM":
+        scene = "⛈️ ⚡\nThe atmosphere is heavy. Be kind to yourself while the storm passes."
+    else:
+        scene = "🌈\nA unique atmosphere is forming..."
+
+    return report + scene + "\n" + "═" * 45
 
 def analyze_structure(user_text):
     """
@@ -125,8 +143,9 @@ if __name__ == "__main__":
     
     # 1. Get Input
     user_input = input("What thoughts are moving through your mind right now? ")
-    # 2. THE SAFETY INTERCEPTION (New!)
-    # We call the function we imported from security.py
+    
+    # 2. THE SAFETY INTERCEPTION
+    # Make sure 'from security import check_for_crisis' is at the top of your file!
     is_crisis = check_for_crisis(user_input)
 
     if is_crisis:
@@ -135,20 +154,10 @@ if __name__ == "__main__":
     else:
         # 3. If safe, we proceed to the mood analysis
         mood_score = analyze_journal_entry(user_input)
-        weather = translate_score_to_weather(mood_score)
+        
+        # FIX: Pass BOTH mood_score and user_input here
+        weather = translate_score_to_weather(mood_score, user_input)
         
         # 4. Show the result
         final_report = update_world_visual(weather, mood_score)
         print("\n" + final_report)
-    
-    # 2. Run Step 1 (The Analysis)
-    mood_score = analyze_journal_entry(user_input)
-    
-    # 3. Run Step 2 (The Translation)
-    # We pass the result from Step 1 into Step 2
-    weather = translate_score_to_weather(mood_score)
-    
-    # 4. Run Step 3 (The Delivery)
-    final_report = update_world_visual(weather, mood_score)
-    
-    print("\n" + final_report)
