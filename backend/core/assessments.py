@@ -1,0 +1,129 @@
+"""
+FILE: assessments.py
+PURPOSE: This module provides clinical-standard screening tools (GAD-7 and PHQ-9).
+WHY WE ADDED THIS: 
+While sentiment analysis (engine.py) tracks 'how' a user feels in the moment, 
+these assessments track 'symptoms' over time. This helps users differentiate 
+between a 'bad day' (weather) and a 'pattern' (clinical anxiety/depression).
+
+WHAT IS GAD-7? 
+Generalized Anxiety Disorder 7-item scale. It is a world-standard 
+screening tool for measuring the severity of anxiety.
+
+WHAT IS PHQ-9? 
+Patient Health Questionnaire 9-item scale. It is used to screen, 
+diagnose, and monitor the severity of depression.
+"""
+
+
+# GAD-7: ANXIETY ASSESSMENT
+
+def run_gad7():
+    """
+    Runs the 7-question anxiety screening.
+    Scoring: 0-4 Minimal, 5-9 Mild, 10-14 Moderate, 15+ Severe.
+    """
+    print("\n" + "═"*50)
+    print("      GAD-7: ANXIETY SCREENING TOOL")
+    print("  Over the last 2 weeks, how often have you been")
+    print("  bothered by the following problems?")
+    print("  (0: Not at all | 1: Several days | 2: Half the days | 3: Every day)")
+    print("═"*50)
+
+    questions = [
+        "1. Feeling nervous, anxious, or on edge",
+        "2. Not being able to stop or control worrying",
+        "3. Worrying too much about different things",
+        "4. Trouble relaxing",
+        "5. Being so restless that it is hard to sit still",
+        "6. Becoming easily annoyed or irritable",
+        "7. Feeling afraid as if something awful might happen"
+    ]
+
+    score = _collect_scores(questions)
+    
+    # Interpretation Logic
+    if score <= 4: result = "Minimal Anxiety"
+    elif score <= 9: result = "Mild Anxiety"
+    elif score <= 14: result = "Moderate Anxiety"
+    else: result = "Severe Anxiety"
+
+    print(f"\nYour GAD-7 Score: {score}")
+    print(f"Result: {result}")
+    return score, result
+
+
+
+# PHQ-9: DEPRESSION ASSESSMENT
+
+def run_phq9():
+    """
+    Runs the 9-question depression screening.
+    Scoring: 0-4 Minimal, 5-9 Mild, 10-14 Moderate, 15-19 Mod. Severe, 20+ Severe.
+    """
+    print("\n" + "═"*50)
+    print("      PHQ-9: DEPRESSION SCREENING TOOL")
+    print("  Over the last 2 weeks, how often have you been")
+    print("  bothered by the following problems?")
+    print("  (0: Not at all | 1: Several days | 2: Half the days | 3: Every day)")
+    print("═"*50)
+
+    questions = [
+        "1. Little interest or pleasure in doing things",
+        "2. Feeling down, depressed, or hopeless",
+        "3. Trouble falling or staying asleep, or sleeping too much",
+        "4. Feeling tired or having little energy",
+        "5. Poor appetite or overeating",
+        "6. Feeling bad about yourself — or that you are a failure",
+        "7. Trouble concentrating on things (e.g. reading)",
+        "8. Moving or speaking so slowly... or being fidgety/restless",
+        "9. Thoughts that you would be better off dead, or hurting yourself"
+    ]
+
+    score = _collect_scores(questions)
+
+    # Interpretation Logic
+    if score <= 4: result = "Minimal Depression"
+    elif score <= 9: result = "Mild Depression"
+    elif score <= 14: result = "Moderate Depression"
+    elif score <= 19: result = "Moderately Severe Depression"
+    else: result = "Severe Depression"
+
+    print(f"\nYour PHQ-9 Score: {score}")
+    print(f"Result: {result}")
+    return score, result
+
+
+
+# INTERNAL HELPER (The Input Machine)
+
+def _collect_scores(questions):
+    """
+    A helper function to prevent code repetition. 
+    It loops through questions and ensures valid 0-3 inputs.
+    """
+    total = 0
+    for q in questions:
+        while True:
+            try:
+                val = int(input(f"{q}: "))
+                if 0 <= val <= 3:
+                    total += val
+                    break
+                else:
+                    print("⚠️  Please enter a number between 0 and 3.")
+            except ValueError:
+                print("⚠️  Invalid input. Please enter a number (0, 1, 2, or 3).")
+    return total
+
+
+# TESTER BLOCK
+
+if __name__ == "__main__":
+    # This allows you to test the file independently
+    print("Innerverse Assessment Module Active.")
+    choice = input("Test GAD-7 (A) or PHQ-9 (B)? ").upper()
+    if choice == "A":
+        run_gad7()
+    elif choice == "B":
+        run_phq9()
