@@ -204,14 +204,13 @@ if __name__ == "__main__":
     user_input = slow_input("What thoughts are moving through your mind right now? ")
     
     # 2. THE SAFETY INTERCEPTION
-    # Make sure 'from security import check_for_crisis' is at the top of your file!
     is_crisis = check_for_crisis(user_input)
 
     if is_crisis:
         # If the security file says "True", we stop everything else.
         print("\n🚨 SAFETY ALERT: Please reach out for support. Dial 988.")
     else:
-        # 3. Proceed to analysis
+        # 3. Proceed to analysis (This only runs if NO crisis)
         mood_score = analyze_journal_entry(user_input)
         weather = translate_score_to_weather(mood_score, user_input)
         
@@ -219,11 +218,8 @@ if __name__ == "__main__":
         description = update_world_visual(weather, mood_score) 
         display_report(weather, mood_score, description)
 
-        # Get the specific intent (like ANGER or SADNESS)
         current_intent = detect_intent(user_input)
-        # Get the Avatar's compassionate response
         avatar_voice = get_avatar_response(weather, current_intent)
-        # Display it!
         print(f"\n✨ {avatar_voice}\n")
 
         # --- THE BREATHING TRIGGER ---
@@ -240,16 +236,15 @@ if __name__ == "__main__":
             print("[bold green]Avatar: You're doing great. One step at a time.[/bold green]")
 
         # --- THE MEMORY LINK ---
-        # Save this to your JSON file so it persists
         save_entry(weather, mood_score)
 
-    # 5. NEW: Check if we need a clinical deep-dive
-    if check_for_assessment_trigger():
-        print("\n" + "!"*30)
-        print("NOTICE: The atmosphere has been heavy for a few days.")
-        print("Would you like to take a quick GAD-7 or PHQ-9 check-in?")
-        choice = input("Type 'YES' to start or 'NO' to continue: ").upper()
-        
-        if choice == 'YES':
-            # You can choose which one to run, or offer both
-            run_phq9()
+        # 5. CLINICAL TRIGGER (Now correctly inside the 'else' block)
+        # This will NO LONGER trigger if is_crisis is True
+        if check_for_assessment_trigger():
+            print("\n" + "!"*30)
+            print("NOTICE: The atmosphere has been heavy for a few days.")
+            print("Would you like to take a quick GAD-7 or PHQ-9 check-in?")
+            choice = input("Type 'YES' to start or 'NO' to continue: ").upper()
+            
+            if choice == 'YES':
+                run_phq9()

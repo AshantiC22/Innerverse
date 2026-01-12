@@ -46,5 +46,17 @@
     {
         "weather": "THUNDERSTORM",
         "score": 0.38
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": 0.38
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.26
+    },
+    {
+        "weather": "RADIANT SUN",
+        "score": 0.6
     }
 ]
