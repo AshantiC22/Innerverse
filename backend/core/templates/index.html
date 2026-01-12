@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Innerverse | The Avatar's House</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body id="mood-body">
+    <div class="container">
+      <h1 id="weather-title">--- Welcome to Innerverse ---</h1>
+
+      <div id="avatar-display">
+        <p id="avatar-text">
+          ✨ What thoughts are moving through your mind right now?
+        </p>
+      </div>
+
+      <div class="input-area">
+        <textarea
+          id="user-input"
+          placeholder="Type your thoughts here..."
+        ></textarea>
+        <button onclick="submitEntry()">Send to Innerverse</button>
+      </div>
+
+      <div id="report-card" class="hidden">
+        <p><strong>Atmosphere:</strong> <span id="weather-val"></span></p>
+        <p><strong>Mood Index:</strong> <span id="score-val"></span></p>
+      </div>
+    </div>
+
+    <div id="skill-overlay" class="overlay hidden">
+      <div class="overlay-content">
+        <h2 id="skill-title">Grounding Exercise</h2>
+        <p id="skill-prompt"></p>
+        <input
+          type="text"
+          id="skill-input"
+          placeholder="Type here..."
+          onkeydown="handleSkillInput(event)"
+        />
+        <div id="skill-progress"></div>
+        <button onclick="closeSkill()">I feel better</button>
+      </div>
+    </div>
+
+    <script>
+      // --- STATE MANAGEMENT FOR GROUNDING SKILL ---
+      let groundingSteps = [
+        { sense: "SEE", count: 5, emoji: "👀" },
+        { sense: "TOUCH", count: 4, emoji: "🖐️" },
+        { sense: "HEAR", count: 3, emoji: "👂" },
+        { sense: "SMELL", count: 2, emoji: "👃" },
+        { sense: "TASTE", count: 1, emoji: "👅" },
+      ];
+      let currentStep = 0;
+      let currentCount = 1;
+
+      // --- TYPEWRITER LOGIC ---
+      function typeWriter(text, elementId, speed = 30) {
+        let i = 0;
+        const element = document.getElementById(elementId);
+        element.innerHTML = "✨ "; // Reset with the sparkle icon
+
+        function type() {
+          if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+          }
+        }
+        type();
+      }
+
+      // --- MAIN GATE: JOURNAL PROCESSING ---
+      async function submitEntry() {
+        const userInputField = document.getElementById("user-input");
+        const text = userInputField.value;
+
+        if (!text.trim()) return; // Don't send empty thoughts
+
+        const response = await fetch("/process", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: text }),
+        });
+        const data = await response.json();
+
+        // 1. Handle Crisis Intercept
+        if (data.is_crisis) {
+          typeWriter(data.avatar_msg, "avatar-text");
+          document.getElementById("mood-body").className = "crisis-mode";
+          return; // Stop all other logic
+        }
+
+        // 2. Update Avatar Response with Typewriter
+        const avatarMsg = `Atmosphere: ${data.weather}. I'm here with you.`;
+        typeWriter(avatarMsg, "avatar-text");
+
+        // 3. Update Visual Mood (CSS Class)
+        document.getElementById("mood-body").className = data.weather
+          .replace(/\s+/g, "-")
+          .toLowerCase();
+
+        // 4. Update Technical Report Card
+        document.getElementById("weather-val").innerText = data.weather;
+        document.getElementById("score-val").innerText = data.score;
+        document.getElementById("report-card").classList.remove("hidden");
+
+        // 5. Trigger Skill Overlay if needed
+        if (data.skill === "grounding") {
+          setTimeout(() => startGrounding(), 2500); // Start after typewriter finishes
+        }
+
+        userInputField.value = ""; // Clear for next entry
+      }
+
+      // --- SKILL OVERLAY LOGIC ---
+      function startGrounding() {
+        document.getElementById("skill-overlay").classList.remove("hidden");
+        currentStep = 0;
+        currentCount = 1;
+        updateSkillPrompt();
+      }
+
+      function updateSkillPrompt() {
+        const step = groundingSteps[currentStep];
+        const promptElement = document.getElementById("skill-prompt");
+        promptElement.innerHTML = `${step.emoji} Name something you can <strong>${step.sense}</strong> (${currentCount}/${step.count})`;
+      }
+
+      function handleSkillInput(event) {
+        if (event.key === "Enter") {
+          const inputField = event.target;
+          const val = inputField.value;
+          if (val.trim() === "") return;
+
+          inputField.value = ""; // Clear for next item
+          currentCount++;
+
+          // Move to next sense if count is reached
+          if (currentCount > groundingSteps[currentStep].count) {
+            currentStep++;
+            currentCount = 1;
+          }
+
+          // Check if finished
+          if (currentStep >= groundingSteps.length) {
+            document.getElementById("skill-prompt").innerText =
+              "You are back. You are safe. You are here.";
+            inputField.classList.add("hidden");
+          } else {
+            updateSkillPrompt();
+          }
+        }
+      }
+
+      function closeSkill() {
+        document.getElementById("skill-overlay").classList.add("hidden");
+        document.getElementById("skill-input").classList.remove("hidden");
+      }
+    </script>
+  </body>
+</html>
