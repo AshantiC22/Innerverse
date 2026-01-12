@@ -90,5 +90,37 @@
     {
         "weather": "FOGGY MIST",
         "score": 0.0
+    },
+    {
+        "weather": "FOGGY MIST",
+        "score": 0.0
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": -0.5
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.25
+    },
+    {
+        "weather": "RADIANT SUN",
+        "score": 0.0
+    },
+    {
+        "weather": "FOGGY MIST",
+        "score": -0.25
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": -0.5
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.4
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": -0.5
     }
 ]
