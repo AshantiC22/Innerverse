@@ -44,18 +44,23 @@ def get_avatar_response(weather, intent):
     return "Avatar: I'm here, and I'm listening."
 
 def run_grounding_exercise():
-    """Guided 5-4-3-2-1 Grounding technique for Anxiety/Foggy Mist."""
-    print("\n✨ [bold cyan]Avatar: The fog feels thick, let's find our way back to the present...[/bold cyan]")
+    """Guided 5-4-3-2-1 Grounding technique with individual inputs."""
+    print("\n✨ [bold cyan]Avatar: The fog feels thick. Let's find our way back to the present...[/bold cyan]")
     
-    prompts = [
-        "👀 Name 5 things you can SEE around you: ",
-        "🖐️ Name 4 things you can TOUCH right now: ",
-        "👂 Name 3 things you can HEAR in this moment: ",
-        "👃 Name 2 things you can SMELL (or favorite scents): ",
-        "👅 Name 1 thing you can TASTE (or your favorite flavor): "
+    # Define the senses and how many items for each
+    senses = [
+        {"action": "SEE", "count": 5, "emoji": "👀"},
+        {"action": "TOUCH", "count": 4, "emoji": "🖐️"},
+        {"action": "HEAR", "count": 3, "emoji": "👂"},
+        {"action": "SMELL", "count": 2, "emoji": "👃"},
+        {"action": "TASTE", "count": 1, "emoji": "👅"}
     ]
     
-    for p in prompts:
-        input(p) # This lets the user type their answer before moving to the next
+    for sense in senses:
+        print(f"\n{sense['emoji']} [bold white]Name {sense['count']} things you can {sense['action']}:[/bold white]")
+        
+        for i in range(1, sense['count'] + 1):
+            # This forces the user to type one item and press Enter before the next number appears
+            input(f"  {i}. ") 
     
     print("\n[bold green]Avatar: I can see you clearly now. You are right here.[/bold green]")

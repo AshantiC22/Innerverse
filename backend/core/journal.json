@@ -74,5 +74,21 @@
     {
         "weather": "FOGGY MIST",
         "score": -0.25
+    },
+    {
+        "weather": "FOGGY MIST",
+        "score": -0.25
+    },
+    {
+        "weather": "FOGGY MIST",
+        "score": -0.25
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": -0.7
+    },
+    {
+        "weather": "FOGGY MIST",
+        "score": 0.0
     }
 ]

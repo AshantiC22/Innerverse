@@ -136,15 +136,19 @@ def translate_score_to_weather(sentiment_score, user_text):
     intent = detect_intent(user_text)
     multiplier = get_intensity_multiplier(user_text)
     
-    # Priority 2: Fog & Anxiety
-    if intent in ["ANXIETY", "CONFUSION"]:
+    # --- PRIORITY 1: Positive Intents ---
+    if intent in ["JOY", "GRATITUDE", "EXCITEMENT"]:
+        return "RADIANT SUN"
+    
+    # --- PRIORITY 2: Specific Negative Intents ---
+    if intent == "ANXIETY":
         return "FOGGY MIST"
-
-    # Priority 1: High-Intensity Storms
+    
+    # Priority 4: Anger or Overwhelmed
     if intent in ["ANGER", "OVERWHELMED"] and multiplier >= 1.5:
         return "THUNDERSTORM"
     
-    # Priority 3: Standard Sadness/Rain
+    # Priority 4: Standard Sadness/Rain
     if intent == "SADNESS":
         return "STEADY RAIN"
     
@@ -152,7 +156,7 @@ def translate_score_to_weather(sentiment_score, user_text):
     adjusted_score = sentiment_score * multiplier
     if adjusted_score > 0.5: return "RADIANT SUN"
     elif adjusted_score < -0.5: return "THUNDERSTORM"
-    elif -0.1 < adjusted_score < 0.1: return "FOGGY MIST"
+    elif -0.05 < adjusted_score < 0.05: return "FOGGY MIST"
     else: return "STEADY RAIN"
     
 def update_world_visual(weather, score):
