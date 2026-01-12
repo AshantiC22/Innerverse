@@ -58,5 +58,21 @@
     {
         "weather": "RADIANT SUN",
         "score": 0.6
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.25
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.25
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.25
+    },
+    {
+        "weather": "FOGGY MIST",
+        "score": -0.25
     }
 ]

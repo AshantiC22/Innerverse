@@ -71,7 +71,7 @@ from assessments import run_gad7, run_phq9  # Import the new tools
 INTENT_PATTERNS = {
     "ANGER": ["i'm frustrated because", "i'm pissed off", "felt disrespected", "i hate","upset","i'm upset"],
     "SADNESS": ["i'm really sad about", "i'm hurting right now", "this is hard for me", "i feel lonely"],
-    "ANXIETY": ["i'm anxious about", "i'm worried that", "my anxiety's really high", "freaks me out"],
+    "ANXIETY": ["i'm anxious about", "i'm really anxious","i'm worried that", "my anxiety's really high", "freaks me out"],
     "OVERWHELMED": ["i'm totally overwhelmed", "too much on my plate", "can't handle all of this"],
     "CONFUSION": ["i'm confused about", "i don't get it", "need some clarity"],
     "GRATITUDE": ["i really appreciate", "thanks for", "i'm grateful"],
@@ -136,13 +136,13 @@ def translate_score_to_weather(sentiment_score, user_text):
     intent = detect_intent(user_text)
     multiplier = get_intensity_multiplier(user_text)
     
-    # Priority 1: High-Intensity Storms
-    if intent in ["ANGER", "OVERWHELMED"] and multiplier >= 1.5:
-        return "THUNDERSTORM"
-    
     # Priority 2: Fog & Anxiety
     if intent in ["ANXIETY", "CONFUSION"]:
         return "FOGGY MIST"
+
+    # Priority 1: High-Intensity Storms
+    if intent in ["ANGER", "OVERWHELMED"] and multiplier >= 1.5:
+        return "THUNDERSTORM"
     
     # Priority 3: Standard Sadness/Rain
     if intent == "SADNESS":
@@ -222,18 +222,21 @@ if __name__ == "__main__":
         avatar_voice = get_avatar_response(weather, current_intent)
         print(f"\n✨ {avatar_voice}\n")
 
-        # --- THE BREATHING TRIGGER ---
-        if current_intent == "OVERWHELMED" or current_intent == "ANXIETY":
+        # --- THE SKILLS TRIGGER ---
+        # 1. Overwhelmed gets Breathing
+        if current_intent == "OVERWHELMED":
             import time
             print("\n[bold cyan]Avatar: Let's take a moment together...[/bold cyan]")
             time.sleep(1)
-            print("Inhale... (4s)")
-            time.sleep(4)
-            print("Hold... (4s)")
-            time.sleep(4)
-            print("Exhale... (4s)")
-            time.sleep(4)
+            print("Inhale... (4s)"); time.sleep(4)
+            print("Hold... (4s)"); time.sleep(4)
+            print("Exhale... (4s)"); time.sleep(4)
             print("[bold green]Avatar: You're doing great. One step at a time.[/bold green]")
+
+        # 2. Anxiety or Foggy Mist gets Grounding
+        elif current_intent == "ANXIETY" or weather == "FOGGY MIST":
+            from utils.avatar import run_grounding_exercise
+            run_grounding_exercise()
 
         # --- THE MEMORY LINK ---
         save_entry(weather, mood_score)

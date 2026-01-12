@@ -42,3 +42,20 @@ def get_avatar_response(weather, intent):
         return "Avatar: It's a beautiful day in here. Let's hold onto this feeling."
     
     return "Avatar: I'm here, and I'm listening."
+
+def run_grounding_exercise():
+    """Guided 5-4-3-2-1 Grounding technique for Anxiety/Foggy Mist."""
+    print("\n✨ [bold cyan]Avatar: The fog feels thick, let's find our way back to the present...[/bold cyan]")
+    
+    prompts = [
+        "👀 Name 5 things you can SEE around you: ",
+        "🖐️ Name 4 things you can TOUCH right now: ",
+        "👂 Name 3 things you can HEAR in this moment: ",
+        "👃 Name 2 things you can SMELL (or favorite scents): ",
+        "👅 Name 1 thing you can TASTE (or your favorite flavor): "
+    ]
+    
+    for p in prompts:
+        input(p) # This lets the user type their answer before moving to the next
+    
+    print("\n[bold green]Avatar: I can see you clearly now. You are right here.[/bold green]")
