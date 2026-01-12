@@ -5,6 +5,8 @@ from security import check_for_crisis#Go to the file named security.py, find the
 from assessments import run_gad7, run_phq9#Go to the file named security.py, find the machine named check_for_crisis, and bring it here so I can use it in this file.
 from utils.interface import slow_print, slow_input, display_report
 from utils.storage import load_history, save_entry
+from utils.avatar import get_avatar_response
+
 '''
 we are going to buld a bridge between 'Text' and Action. In this file, I will need o think through these three steps:
 1. The Analysis:How do I take a sentence like "Im feeling really lonely today" and turn it into a number?
@@ -216,6 +218,26 @@ if __name__ == "__main__":
         # 4. Show result
         description = update_world_visual(weather, mood_score) 
         display_report(weather, mood_score, description)
+
+        # Get the specific intent (like ANGER or SADNESS)
+        current_intent = detect_intent(user_input)
+        # Get the Avatar's compassionate response
+        avatar_voice = get_avatar_response(weather, current_intent)
+        # Display it!
+        print(f"\n✨ {avatar_voice}\n")
+
+        # --- THE BREATHING TRIGGER ---
+        if current_intent == "OVERWHELMED" or current_intent == "ANXIETY":
+            import time
+            print("\n[bold cyan]Avatar: Let's take a moment together...[/bold cyan]")
+            time.sleep(1)
+            print("Inhale... (4s)")
+            time.sleep(4)
+            print("Hold... (4s)")
+            time.sleep(4)
+            print("Exhale... (4s)")
+            time.sleep(4)
+            print("[bold green]Avatar: You're doing great. One step at a time.[/bold green]")
 
         # --- THE MEMORY LINK ---
         # Save this to your JSON file so it persists

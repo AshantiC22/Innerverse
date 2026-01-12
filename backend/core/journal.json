@@ -42,5 +42,9 @@
     {
         "weather": "STEADY RAIN",
         "score": 0.2
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": 0.38
     }
 ]
