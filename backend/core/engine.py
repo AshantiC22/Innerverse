@@ -64,6 +64,40 @@ Now lets build the skeleton
 '''
 from assessments import run_gad7, run_phq9  # Import the new tools
 
+# The "Emotion Lexicon" derived from your guide
+# The "Emotion Lexicon" derived from your provided guide
+INTENT_PATTERNS = {
+    "ANGER": ["i'm frustrated because", "i'm pissed off", "felt disrespected", "i hate","upset","i'm upset"],
+    "SADNESS": ["i'm really sad about", "i'm hurting right now", "this is hard for me", "i feel lonely"],
+    "ANXIETY": ["i'm anxious about", "i'm worried that", "my anxiety's really high", "freaks me out"],
+    "OVERWHELMED": ["i'm totally overwhelmed", "too much on my plate", "can't handle all of this"],
+    "CONFUSION": ["i'm confused about", "i don't get it", "need some clarity"],
+    "GRATITUDE": ["i really appreciate", "thanks for", "i'm grateful"],
+    "EXCITEMENT": ["i'm so pumped", "can't wait for"]
+}
+
+def detect_intent(user_text):
+    """Checks if the user used a specific 'Sentence Starter' from the guide."""
+    clean_text = user_text.lower().strip()
+    for emotion, patterns in INTENT_PATTERNS.items():
+        if any(p in clean_text for p in patterns):
+            return emotion
+    return None
+
+def get_intensity_multiplier(user_text):
+    """Determines the 'volume' of the emotion based on intensity modifiers."""
+    text = user_text.lower()
+    # High Intensity
+    if any(word in text for word in ["extremely", "totally", "pissed off", "can't handle"]):
+        return 2.0  
+    # Medium Intensity
+    if any(word in text for word in ["really", "very", "so"]):
+        return 1.5  
+    # Low Intensity
+    if any(word in text for word in ["kinda", "sort of", "a little"]):
+        return 0.5  
+    return 1.0
+
 # A mock list to simulate 'History' (usually this comes from a database)
 mood_history = ["THUNDERSTORM", "STEADY RAIN"] 
 
@@ -82,6 +116,7 @@ def check_for_assessment_trigger(): # Removed current_weather parameter to pull 
     heavy_weather_count = sum(1 for entry in last_three if entry.get("weather") in ["STEADY RAIN", "THUNDERSTORM"])
     
     return heavy_weather_count >= 3
+    
 
 def analyze_journal_entry(user_text):
     # We use TextBlob to get the raw polarity (-1 to 1)
@@ -96,29 +131,28 @@ def analyze_journal_entry(user_text):
     return sentiment
 
 def translate_score_to_weather(sentiment_score, user_text):
-    """
-    Refined Logic:
-    - Sentiment > 0.5: Radiant Sun (High Joy)
-    - Sentiment 0.1 to 0.5: Clear Skies (Content)
-    - Sentiment -0.1 to 0.1: Foggy/Mist (Neutral)
-    - Sentiment -0.1 to -0.5: Rain (Sad)
-    - Sentiment < -0.5: Thunderstorm (Distressed)
-    """
+    intent = detect_intent(user_text)
+    multiplier = get_intensity_multiplier(user_text)
     
-    # We can also check for '!!!' here to boost the intensity
-    is_intense = "!" in user_text
-    
-    if sentiment_score > 0.5:
-        return "RADIANT SUN" if is_intense else "CLEAR SKIES"
-    elif 0.1 <= sentiment_score <= 0.5:
-        return "PARTLY CLOUDY"
-    elif -0.1 < sentiment_score < 0.1:
-        return "FOGGY MIST"
-    elif -0.5 <= sentiment_score <= -0.1:
-        return "STEADY RAIN"
-    else:
+    # Priority 1: High-Intensity Storms
+    if intent in ["ANGER", "OVERWHELMED"] and multiplier >= 1.5:
         return "THUNDERSTORM"
-
+    
+    # Priority 2: Fog & Anxiety
+    if intent in ["ANXIETY", "CONFUSION"]:
+        return "FOGGY MIST"
+    
+    # Priority 3: Standard Sadness/Rain
+    if intent == "SADNESS":
+        return "STEADY RAIN"
+    
+    # Fallback to math
+    adjusted_score = sentiment_score * multiplier
+    if adjusted_score > 0.5: return "RADIANT SUN"
+    elif adjusted_score < -0.5: return "THUNDERSTORM"
+    elif -0.1 < adjusted_score < 0.1: return "FOGGY MIST"
+    else: return "STEADY RAIN"
+    
 def update_world_visual(weather, score):
     """
     Creates a visual text-based 'scene' for the user based on their mood.

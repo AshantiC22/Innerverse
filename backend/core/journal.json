@@ -22,5 +22,25 @@
     {
         "weather": "THUNDERSTORM",
         "score": -0.65
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": 0.14
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": 0.14
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": -0.34
+    },
+    {
+        "weather": "THUNDERSTORM",
+        "score": 0.0
+    },
+    {
+        "weather": "STEADY RAIN",
+        "score": 0.2
     }
 ]
