@@ -3,637 +3,460 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Innerverse | The Living House</title>
+    <title>Innerverse | The Living House - Multi-Room</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  </head>
-  <style>
-    body,
-    html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #000;
-      font-family: "Courier New", Courier, monospace;
-      color: white;
-    }
-    * {
-      box-sizing: border-box;
-    }
-
-    #canvas-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-
-    .gate {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      transition: opacity 1s ease-in-out;
-      background: radial-gradient(
-        circle at center,
-        rgba(20, 20, 30, 0.95),
-        rgba(0, 0, 0, 0.98)
-      );
-    }
-
-    .porch-content {
-      background: linear-gradient(
-        135deg,
-        rgba(40, 40, 50, 0.9),
-        rgba(20, 20, 30, 0.95)
-      );
-      padding: 50px 60px;
-      border-radius: 20px;
-      color: white;
-      text-align: center;
-      border: 2px solid rgba(100, 100, 120, 0.4);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      max-width: 500px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .porch-content::before {
-      content: "";
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(
-        circle,
-        rgba(100, 150, 200, 0.1) 0%,
-        transparent 70%
-      );
-      animation: porchGlow 6s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    @keyframes porchGlow {
-      0%,
-      100% {
-        transform: translate(0, 0) scale(1);
-        opacity: 0.3;
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+        font-family: "Courier New", Courier, monospace;
+        color: white;
       }
-      50% {
-        transform: translate(10px, 10px) scale(1.1);
-        opacity: 0.5;
+
+      #canvas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
       }
-    }
 
-    .porch-content h1 {
-      margin: 0 0 15px 0;
-      font-size: 2.5em;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, #ffffff, #a0c0e0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      position: relative;
-      z-index: 1;
-    }
+      .gate {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        transition: opacity 1s ease-in-out;
+        background: radial-gradient(
+          circle at center,
+          rgba(20, 20, 30, 0.95),
+          rgba(0, 0, 0, 0.98)
+        );
+      }
 
-    .porch-content p {
-      margin: 10px 0 25px 0;
-      font-size: 1.1em;
-      color: rgba(255, 255, 255, 0.8);
-      letter-spacing: 1px;
-      position: relative;
-      z-index: 1;
-    }
+      .porch-content {
+        background: linear-gradient(
+          135deg,
+          rgba(40, 40, 50, 0.9),
+          rgba(20, 20, 30, 0.95)
+        );
+        padding: 50px 60px;
+        border-radius: 20px;
+        color: white;
+        text-align: center;
+        border: 2px solid rgba(100, 100, 120, 0.4);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        max-width: 500px;
+      }
 
-    textarea {
-      width: 100%;
-      max-width: 400px;
-      height: 120px;
-      background: rgba(10, 10, 20, 0.8);
-      color: #fff;
-      border: 2px solid rgba(100, 100, 120, 0.4);
-      padding: 15px;
-      margin: 15px 0;
-      font-family: inherit;
-      font-size: 15px;
-      border-radius: 12px;
-      resize: vertical;
-      transition: all 0.3s ease;
-      position: relative;
-      z-index: 1;
-    }
+      .porch-content h1 {
+        margin: 0 0 15px 0;
+        font-size: 2.5em;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, #ffffff, #a0c0e0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
 
-    textarea:focus {
-      outline: none;
-      border-color: rgba(160, 192, 224, 0.8);
-      box-shadow: 0 0 20px rgba(160, 192, 224, 0.2);
-      background: rgba(20, 20, 30, 0.9);
-    }
+      .porch-content p {
+        margin: 10px 0 25px 0;
+        font-size: 1.1em;
+        color: rgba(255, 255, 255, 0.8);
+        letter-spacing: 1px;
+      }
 
-    button {
-      padding: 15px 35px;
-      cursor: pointer;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: none;
-      color: white;
-      font-weight: bold;
-      border-radius: 10px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      font-family: inherit;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      position: relative;
-      z-index: 1;
-    }
+      textarea {
+        width: 100%;
+        max-width: 400px;
+        height: 120px;
+        background: rgba(10, 10, 20, 0.8);
+        color: #fff;
+        border: 2px solid rgba(100, 100, 120, 0.4);
+        padding: 15px;
+        margin: 15px 0;
+        font-family: inherit;
+        font-size: 15px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+      }
 
-    button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
-    }
+      textarea:focus {
+        outline: none;
+        border-color: rgba(160, 192, 224, 0.8);
+        box-shadow: 0 0 20px rgba(160, 192, 224, 0.2);
+      }
 
-    button:disabled {
-      background: linear-gradient(135deg, #555 0%, #333 100%);
-      cursor: not-allowed;
-      transform: none;
-    }
+      button {
+        padding: 15px 35px;
+        cursor: pointer;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        font-weight: bold;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
 
-    .room-ui {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-      opacity: 0;
-      transition: opacity 2s ease;
-      text-align: center;
-      color: white;
-      background: linear-gradient(
-        135deg,
-        rgba(20, 20, 30, 0.9),
-        rgba(40, 40, 50, 0.85)
-      );
-      padding: 25px 40px;
-      border-radius: 15px;
-      backdrop-filter: blur(10px);
-    }
+      button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+      }
 
-    #room-status {
-      margin: 0 0 10px 0;
-      font-size: 1.4em;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
+      button:disabled {
+        background: linear-gradient(135deg, #555 0%, #333 100%);
+        cursor: not-allowed;
+      }
 
-    #intensity-display {
-      margin: 5px 0 15px 0;
-      font-size: 0.9em;
-      color: rgba(255, 255, 255, 0.7);
-      letter-spacing: 1px;
-    }
-
-    .error-message {
-      color: #ff6b6b;
-      font-size: 13px;
-      margin-top: 10px;
-      display: none;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .rain-overlay,
-    .fog-overlay,
-    .thunder-flash,
-    .sunset-glow,
-    .heat-wave,
-    .frost-overlay,
-    .love-glow,
-    .dark-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 3;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-
-    .rain-overlay.active,
-    .fog-overlay.active,
-    .sunset-glow.active,
-    .heat-wave.active,
-    .frost-overlay.active,
-    .love-glow.active,
-    .dark-overlay.active {
-      opacity: 1;
-    }
-
-    .thunder-flash.active {
-      animation: lightning 0.1s ease-in-out 3;
-    }
-
-    @keyframes lightning {
-      0%,
-      100% {
+      .room-ui {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 5;
         opacity: 0;
+        transition: opacity 2s ease;
+        text-align: center;
+        background: linear-gradient(
+          135deg,
+          rgba(20, 20, 30, 0.9),
+          rgba(40, 40, 50, 0.85)
+        );
+        padding: 25px 40px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        color: white;
       }
-      50% {
-        opacity: 0.8;
+
+      #room-status {
+        margin: 0 0 5px 0;
+        font-size: 1.1em;
+        letter-spacing: 2px;
       }
-    }
 
-    .sunset-glow {
-      background: radial-gradient(
-        ellipse at 50% 40%,
-        rgba(255, 180, 100, 0.3),
-        transparent 60%
-      );
-    }
-
-    .fog-overlay {
-      background: radial-gradient(
-        ellipse at center,
-        rgba(200, 200, 220, 0.3),
-        transparent
-      );
-    }
-
-    .heat-wave {
-      background: radial-gradient(
-        ellipse at center,
-        rgba(255, 100, 50, 0.2),
-        transparent
-      );
-      animation: heatShimmer 2s ease-in-out infinite;
-    }
-
-    @keyframes heatShimmer {
-      0%,
-      100% {
-        transform: translateY(0px);
+      #current-room-name {
+        margin: 5px 0 10px 0;
+        font-size: 1.3em;
+        color: rgba(160, 192, 224, 0.9);
+        letter-spacing: 1px;
+        font-weight: bold;
       }
-      50% {
-        transform: translateY(-5px);
+
+      #intensity-display {
+        margin: 5px 0 15px 0;
+        font-size: 0.9em;
+        color: rgba(255, 255, 255, 0.7);
       }
-    }
 
-    .frost-overlay {
-      background: radial-gradient(
-        ellipse at center,
-        rgba(150, 200, 255, 0.3),
-        transparent
-      );
-    }
-
-    .love-glow {
-      background: radial-gradient(
-        ellipse at center,
-        rgba(255, 150, 200, 0.4),
-        transparent 70%
-      );
-      animation: heartPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes heartPulse {
-      0%,
-      100% {
-        opacity: 0.8;
+      .hidden {
+        display: none !important;
       }
-      50% {
+
+      .transition-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.6s ease-in-out;
+      }
+
+      .transition-overlay.active {
         opacity: 1;
       }
-    }
 
-    .dark-overlay {
-      background: radial-gradient(
-        ellipse at center,
-        rgba(0, 0, 0, 0.7),
-        rgba(0, 0, 0, 0.9)
-      );
-    }
-  </style>
+      .rain-overlay,
+      .fog-overlay,
+      .sunset-glow,
+      .heat-wave,
+      .love-glow,
+      .dark-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 3;
+        opacity: 0;
+        transition: opacity 1.5s ease;
+      }
+
+      .rain-overlay.active,
+      .fog-overlay.active,
+      .sunset-glow.active,
+      .heat-wave.active,
+      .love-glow.active,
+      .dark-overlay.active {
+        opacity: 1;
+      }
+
+      .sunset-glow {
+        background: radial-gradient(
+          ellipse at 50% 40%,
+          rgba(255, 180, 100, 0.3),
+          transparent 60%
+        );
+      }
+
+      .fog-overlay {
+        background: radial-gradient(
+          ellipse at center,
+          rgba(200, 200, 220, 0.3),
+          transparent
+        );
+      }
+
+      .heat-wave {
+        background: radial-gradient(
+          ellipse at center,
+          rgba(255, 100, 50, 0.2),
+          transparent
+        );
+      }
+
+      .love-glow {
+        background: radial-gradient(
+          ellipse at center,
+          rgba(255, 150, 200, 0.4),
+          transparent 70%
+        );
+      }
+
+      .dark-overlay {
+        background: radial-gradient(
+          ellipse at center,
+          rgba(0, 0, 0, 0.7),
+          rgba(0, 0, 0, 0.9)
+        );
+      }
+
+      .room-navigation {
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        z-index: 5;
+        opacity: 0;
+        transition: opacity 2s ease;
+      }
+
+      .nav-button {
+        display: block;
+        margin: 8px 0;
+        padding: 10px 20px;
+        background: rgba(30, 30, 40, 0.8);
+        border: 2px solid rgba(100, 100, 120, 0.4);
+        color: white;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        letter-spacing: 1px;
+      }
+
+      .nav-button:hover {
+        background: rgba(50, 50, 60, 0.9);
+        border-color: rgba(160, 192, 224, 0.6);
+        transform: translateX(-5px);
+      }
+
+      .nav-button.current-room {
+        background: rgba(102, 126, 234, 0.4);
+        border-color: rgba(102, 126, 234, 0.8);
+      }
+
+      .error-message {
+        color: #ff6b6b;
+        font-size: 13px;
+        margin-top: 10px;
+        display: none;
+      }
+    </style>
+  </head>
   <body>
     <div id="canvas-container"></div>
+    <div class="transition-overlay" id="transition-overlay"></div>
     <div class="rain-overlay" id="rain-overlay"></div>
     <div class="fog-overlay" id="fog-overlay"></div>
-    <div class="thunder-flash" id="thunder-flash"></div>
     <div class="sunset-glow" id="sunset-glow"></div>
     <div class="heat-wave" id="heat-wave"></div>
-    <div class="frost-overlay" id="frost-overlay"></div>
     <div class="love-glow" id="love-glow"></div>
     <div class="dark-overlay" id="dark-overlay"></div>
 
     <div id="entrance" class="gate">
       <div class="porch-content">
         <h1>The Living House</h1>
-        <p>Standing at the threshold, what brings you here today?</p>
+        <p>What brings you here today?</p>
         <textarea
           id="user-input"
-          placeholder="Share what's in your heart... (try: 'I feel very anxious and a little hopeful' or 'I'm angry but trying to stay calm')"
+          placeholder="Share what's in your heart..."
         ></textarea>
         <div class="error-message" id="error-msg">
-          Please share your feelings before entering.
+          Please share your feelings.
         </div>
-        <button id="enter-btn" onclick="enterHouse()">
-          Cross the Threshold
-        </button>
+        <button id="enter-btn">Cross the Threshold</button>
       </div>
     </div>
 
     <div id="interior-ui" class="room-ui">
-      <h2 id="room-status">The House Awaits</h2>
+      <h2 id="room-status">Emotions</h2>
+      <p id="current-room-name">Hallway</p>
       <p id="intensity-display"></p>
       <button onclick="window.location.reload()">Leave & Return</button>
     </div>
 
+    <div id="room-navigation" class="room-navigation">
+      <button class="nav-button current-room" data-room="hallway">
+        Hallway
+      </button>
+      <button class="nav-button" data-room="living">Living Room</button>
+      <button class="nav-button" data-room="bedroom">Bedroom</button>
+      <button class="nav-button" data-room="study">Study</button>
+      <button class="nav-button" data-room="garden">Garden</button>
+      <button class="nav-button" data-room="attic">Attic</button>
+    </div>
+
     <script>
-      // PHASE 1: EMOTION DETECTION SYSTEM
-      const EMOTION_KEYWORDS = {
+      // CORE VARIABLES
+      let scene,
+        camera,
+        renderer,
+        clock = new THREE.Clock();
+      let currentRoom = "hallway",
+        emotionBlend = {},
+        currentIntensity = 1.0;
+      let hasEntered = false,
+        isTransitioning = false;
+      let roomObjects = {},
+        particles = {};
+      let emotionState = {
+        targetHeight: 3.5,
+        currentHeight: 3.5,
+        breathing: 0.05,
+        shake: 0,
+      };
+
+      // EMOTION KEYWORDS
+      const EMOTIONS = {
         HAPPY: {
-          primary: [
-            "happy",
-            "joy",
-            "joyful",
-            "excited",
-            "elated",
-            "cheerful",
-            "delighted",
-          ],
-          secondary: [
-            "good",
-            "great",
-            "wonderful",
-            "amazing",
-            "fantastic",
-            "pleased",
-          ],
+          pri: ["happy", "joy", "elated"],
+          sec: ["good", "great", "wonderful"],
         },
         LOVE: {
-          primary: [
-            "love",
-            "loved",
-            "loving",
-            "affection",
-            "warmth",
-            "tender",
-            "caring",
-          ],
-          secondary: ["grateful", "thankful", "blessed", "cherish", "adore"],
-        },
-        EXCITEMENT: {
-          primary: [
-            "excited",
-            "energetic",
-            "pumped",
-            "hyper",
-            "thrilled",
-            "eager",
-          ],
-          secondary: ["enthusiastic", "animated", "vibrant", "alive"],
+          pri: ["love", "affection", "warmth"],
+          sec: ["grateful", "thankful"],
         },
         PEACE: {
-          primary: [
-            "peace",
-            "peaceful",
-            "calm",
-            "serene",
-            "tranquil",
-            "relaxed",
-            "meditat",
-          ],
-          secondary: ["quiet", "still", "centered", "balanced", "zen"],
+          pri: ["peace", "calm", "serene"],
+          sec: ["quiet", "still", "centered"],
         },
         HOPE: {
-          primary: [
-            "hope",
-            "hopeful",
-            "optimistic",
-            "positive",
-            "bright",
-            "promising",
-          ],
-          secondary: ["better", "improve", "forward", "future", "tomorrow"],
+          pri: ["hope", "optimistic", "bright"],
+          sec: ["better", "improve", "future"],
         },
-        PROUD: {
-          primary: [
-            "proud",
-            "accomplished",
-            "achieved",
-            "confident",
-            "strong",
-            "capable",
-          ],
-          secondary: ["success", "winning", "powerful", "competent"],
-        },
-
         ANXIETY: {
-          primary: [
-            "anxious",
-            "anxiety",
-            "nervous",
-            "worried",
-            "panic",
-            "overwhelm",
-            "stress",
-          ],
-          secondary: ["tense", "uneasy", "restless", "on edge", "pressure"],
+          pri: ["anxious", "nervous", "worried", "panic"],
+          sec: ["tense", "uneasy"],
         },
         FEAR: {
-          primary: [
-            "fear",
-            "afraid",
-            "scared",
-            "terrified",
-            "terror",
-            "frightened",
-            "dread",
-          ],
-          secondary: ["nightmare", "horror", "phobia", "paranoid"],
+          pri: ["fear", "afraid", "scared", "terrified"],
+          sec: ["nightmare", "horror"],
         },
         ANGER: {
-          primary: [
-            "angry",
-            "anger",
-            "furious",
-            "mad",
-            "rage",
-            "pissed",
-            "irritated",
-          ],
-          secondary: ["annoyed", "frustrated", "agitated", "heated"],
+          pri: ["angry", "furious", "rage"],
+          sec: ["annoyed", "frustrated"],
         },
         SADNESS: {
-          primary: [
-            "sad",
-            "sadness",
-            "cry",
-            "crying",
-            "depressed",
-            "down",
-            "blue",
-            "miserable",
-          ],
-          secondary: ["unhappy", "gloomy", "melancholy", "tearful", "weeping"],
+          pri: ["sad", "cry", "depressed", "down"],
+          sec: ["unhappy", "gloomy"],
         },
         GRIEF: {
-          primary: [
-            "grief",
-            "grieving",
-            "heartbreak",
-            "heartbroken",
-            "devastated",
-            "shattered",
-          ],
-          secondary: ["loss", "mourning", "empty", "hollow", "broken"],
+          pri: ["grief", "heartbreak", "devastated"],
+          sec: ["loss", "mourning", "empty"],
         },
         LONELINESS: {
-          primary: [
-            "lonely",
-            "alone",
-            "isolated",
-            "abandoned",
-            "solitary",
-            "disconnected",
-          ],
-          secondary: ["empty", "nobody", "friendless", "outcast"],
-        },
-        GUILT: {
-          primary: ["guilt", "guilty", "shame", "ashamed", "regret", "remorse"],
-          secondary: ["wrong", "mistake", "fault", "sorry", "blame"],
-        },
-        EXHAUSTION: {
-          primary: [
-            "tired",
-            "exhausted",
-            "drained",
-            "weary",
-            "fatigue",
-            "worn out",
-            "depleted",
-          ],
-          secondary: ["sleepy", "burned out", "spent", "sluggish"],
-        },
-        CONFUSION: {
-          primary: [
-            "confused",
-            "lost",
-            "uncertain",
-            "bewildered",
-            "puzzled",
-            "disoriented",
-          ],
-          secondary: ["unclear", "mixed up", "foggy", "muddled", "perplexed"],
+          pri: ["lonely", "alone", "isolated"],
+          sec: ["nobody", "friendless"],
         },
         NOSTALGIA: {
-          primary: [
-            "nostalgic",
-            "nostalgia",
-            "remember",
-            "memory",
-            "past",
-            "miss",
-            "used to",
-          ],
-          secondary: ["reminisce", "old days", "before", "back then"],
+          pri: ["nostalgic", "remember", "memory", "past"],
+          sec: ["reminisce", "before"],
         },
         CONTEMPLATION: {
-          primary: [
-            "thinking",
-            "contemplat",
-            "ponder",
-            "reflect",
-            "consider",
-            "wonder",
-          ],
-          secondary: ["question", "philosoph", "deep", "meaning", "purpose"],
+          pri: ["thinking", "ponder", "reflect"],
+          sec: ["question", "deep", "meaning"],
         },
       };
 
-      const INTENSITY_KEYWORDS = {
-        EXTREME: [
-          "very",
-          "extremely",
-          "incredibly",
-          "absolutely",
-          "completely",
-          "totally",
-          "utterly",
-          "so much",
-          "overwhelming",
-          "intense",
-        ],
-        HIGH: [
-          "really",
-          "quite",
-          "pretty",
-          "fairly",
-          "rather",
-          "significantly",
-        ],
-        MILD: [
-          "a little",
-          "a bit",
-          "somewhat",
-          "slightly",
-          "kind of",
-          "sort of",
-          "barely",
-        ],
+      const INTENSITY = {
+        EXTREME: ["very", "extremely", "incredibly", "completely"],
+        HIGH: ["really", "quite", "pretty", "fairly"],
+        MILD: ["a little", "a bit", "somewhat", "slightly"],
       };
 
-      // Scene variables
-      let scene, camera, renderer;
-      let walls = [],
-        floor,
-        ceiling,
-        furniture = [];
-      let pointLights = [];
-      let rainParticles, mistParticles, sparkleParticles, dustParticles;
-      let currentEmotion = null;
-      let currentIntensity = 1.0;
-      let emotionBlend = {};
-      let shakeIntensity = 0;
-      let clock = new THREE.Clock();
-      let hasEntered = false;
-      let targetCeilingHeight = 3.5;
-      let currentCeilingHeight = 3.5;
-      let breathingIntensity = 0.05;
-      let timeInEmotion = 0;
+      // ROOM DEFINITIONS
+      const ROOMS = {
+        hallway: {
+          name: "Central Hallway",
+          emotions: [],
+          camera: { x: 0, y: 1.6, z: 6 },
+          look: { x: 0, y: 1.5, z: 0 },
+          bg: 0x2a2a3a,
+        },
+        living: {
+          name: "Living Room",
+          emotions: ["HAPPY", "LOVE", "ANGER", "SADNESS"],
+          camera: { x: 0, y: 1.6, z: 4 },
+          look: { x: 0, y: 1.5, z: -3 },
+          bg: 0x2a2a3a,
+        },
+        bedroom: {
+          name: "Bedroom of Memories",
+          emotions: ["NOSTALGIA", "GRIEF", "LONELINESS"],
+          camera: { x: 0, y: 1.6, z: 5 },
+          look: { x: 0, y: 1.2, z: -2 },
+          bg: 0x1a1a2a,
+        },
+        study: {
+          name: "Study",
+          emotions: ["CONTEMPLATION", "ANXIETY"],
+          camera: { x: -2, y: 1.6, z: 4 },
+          look: { x: 0, y: 1.5, z: -2 },
+          bg: 0x2a3a4a,
+        },
+        garden: {
+          name: "Inner Garden",
+          emotions: ["HOPE", "PEACE", "LOVE"],
+          camera: { x: 0, y: 1.8, z: 6 },
+          look: { x: 0, y: 1.0, z: 0 },
+          bg: 0x3a4a3a,
+        },
+        attic: {
+          name: "Attic of Shadows",
+          emotions: ["FEAR", "ANXIETY"],
+          camera: { x: 0, y: 1.4, z: 5 },
+          look: { x: 0, y: 1.8, z: -2 },
+          bg: 0x0a0a1a,
+        },
+      };
 
-      // Object references
-      let fireParticles = [];
-      let fireplaceLight;
-      let tvScreen;
-      let abstractPaintings = [];
-      let coffeeTable, rug, bookshelf, floorLamp, floorLampLight;
-      let sideTable, tableLamp, tableLampLight;
-      let armchair,
-        plant,
-        plantLeaves = [];
-      let windowFrame, windowPane, curtain;
-      let wallClock,
-        clockHands = [];
-      let books = [];
-      let floorCracks = [];
-      let shadows = [];
-
-      const PORCH_CAMERA = { x: 0, y: 1.6, z: 8 };
-      const ROOM_CAMERA = { x: 0, y: 1.6, z: 4 };
-
+      // INITIALIZATION
       function init3D() {
         scene = new THREE.Scene();
         scene.fog = new THREE.Fog(0x1a1a2e, 8, 20);
@@ -644,8 +467,7 @@
           0.1,
           1000
         );
-        camera.position.set(PORCH_CAMERA.x, PORCH_CAMERA.y, PORCH_CAMERA.z);
-        camera.lookAt(0, 1.5, 0);
+        camera.position.set(0, 1.6, 8);
 
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -655,537 +477,280 @@
           .getElementById("canvas-container")
           .appendChild(renderer.domElement);
 
-        buildHouse();
-        addFurniture();
-        createParticleSystems();
-        createLighting();
+        createParticles();
+        buildAllRooms();
+        setRoomVisibility("hallway", true);
+
+        document
+          .getElementById("enter-btn")
+          .addEventListener("click", enterHouse);
+        document.querySelectorAll(".nav-button").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            navigateToRoom(this.dataset.room);
+          });
+        });
 
         window.addEventListener("resize", onWindowResize);
         animate();
       }
 
-      function buildHouse() {
-        // FLOOR
-        const floorGeo = new THREE.PlaneGeometry(12, 12);
-        const floorMat = new THREE.MeshStandardMaterial({
-          color: 0x5a4a3a,
-          roughness: 0.8,
-        });
-        floor = new THREE.Mesh(floorGeo, floorMat);
-        floor.rotation.x = -Math.PI / 2;
-        floor.receiveShadow = true;
-        scene.add(floor);
-
-        // Floor cracks for rage
-        for (let i = 0; i < 5; i++) {
-          const crack = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.1, 3),
-            new THREE.MeshBasicMaterial({
-              color: 0x000000,
+      // CREATE PARTICLE SYSTEMS
+      function createParticles() {
+        const makeParticles = (count, color, size) => {
+          const geo = new THREE.BufferGeometry();
+          const pos = new Float32Array(count * 3);
+          for (let i = 0; i < count * 3; i += 3) {
+            pos[i] = (Math.random() - 0.5) * 20;
+            pos[i + 1] = Math.random() * 10;
+            pos[i + 2] = (Math.random() - 0.5) * 20;
+          }
+          geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+          return new THREE.Points(
+            geo,
+            new THREE.PointsMaterial({
+              color,
+              size,
               transparent: true,
               opacity: 0,
+              blending:
+                color === 0xffaaff
+                  ? THREE.AdditiveBlending
+                  : THREE.NormalBlending,
             })
           );
-          crack.rotation.x = -Math.PI / 2;
-          crack.position.set(
-            (Math.random() - 0.5) * 10,
-            0.02,
-            (Math.random() - 0.5) * 10
-          );
-          crack.rotation.z = Math.random() * Math.PI;
-          floorCracks.push(crack);
-          scene.add(crack);
-        }
+        };
 
-        // WALLS
-        const wallHeight = 3.5;
-        const roomSize = 12;
-        const wallMat = new THREE.MeshStandardMaterial({
-          color: 0x8b7355,
-          roughness: 0.9,
-        });
+        particles.rain = makeParticles(800, 0x6a9ccc, 0.08);
+        particles.mist = makeParticles(300, 0xcccccc, 0.4);
+        particles.sparkle = makeParticles(200, 0xffaaff, 0.12);
+        particles.dust = makeParticles(150, 0xf0e68c, 0.05);
 
-        const backWall = new THREE.Mesh(
-          new THREE.BoxGeometry(roomSize, wallHeight, 0.3),
-          wallMat
-        );
-        backWall.position.set(0, wallHeight / 2, -roomSize / 2);
-        walls.push(backWall);
-        scene.add(backWall);
-
-        const leftWall = new THREE.Mesh(
-          new THREE.BoxGeometry(0.3, wallHeight, roomSize),
-          wallMat.clone()
-        );
-        leftWall.position.set(-roomSize / 2, wallHeight / 2, 0);
-        walls.push(leftWall);
-        scene.add(leftWall);
-
-        const rightWall = new THREE.Mesh(
-          new THREE.BoxGeometry(0.3, wallHeight, roomSize),
-          wallMat.clone()
-        );
-        rightWall.position.set(roomSize / 2, wallHeight / 2, 0);
-        walls.push(rightWall);
-        scene.add(rightWall);
-
-        // CEILING
-        ceiling = new THREE.Mesh(
-          new THREE.PlaneGeometry(roomSize, roomSize),
-          new THREE.MeshStandardMaterial({ color: 0x6a5a4a })
-        );
-        ceiling.rotation.x = Math.PI / 2;
-        ceiling.position.y = wallHeight;
-        scene.add(ceiling);
-
-        // FIREPLACE
-        const fireplaceBase = new THREE.Mesh(
-          new THREE.BoxGeometry(2.5, 2.2, 0.6),
-          new THREE.MeshStandardMaterial({ color: 0x3a2a2a })
-        );
-        fireplaceBase.position.set(0, 1.1, -5.7);
-        scene.add(fireplaceBase);
-
-        const opening = new THREE.Mesh(
-          new THREE.BoxGeometry(2.0, 1.5, 0.4),
-          new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
-        );
-        opening.position.set(0, 0.9, -5.6);
-        scene.add(opening);
-
-        // Fire particles
-        const fireGeo = new THREE.BufferGeometry();
-        const firePos = new Float32Array(150);
-        for (let i = 0; i < 150; i += 3) {
-          firePos[i] = (Math.random() - 0.5) * 1.5;
-          firePos[i + 1] = Math.random() * 1.2;
-          firePos[i + 2] = -5.5;
-        }
-        fireGeo.setAttribute("position", new THREE.BufferAttribute(firePos, 3));
-        const fire = new THREE.Points(
-          fireGeo,
-          new THREE.PointsMaterial({
-            color: 0xff6600,
-            size: 0.15,
-            transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending,
-          })
-        );
-        fire.position.set(0, 0.2, 0);
-        fireParticles.push(fire);
-        scene.add(fire);
-
-        fireplaceLight = new THREE.PointLight(0xff6600, 1.5, 8);
-        fireplaceLight.position.set(0, 1, -5.5);
-        pointLights.push(fireplaceLight);
-        scene.add(fireplaceLight);
-
-        // COUCH
-        const couchMat = new THREE.MeshStandardMaterial({
-          color: 0x8b4513,
-          roughness: 0.8,
-        });
-        const couch = new THREE.Mesh(
-          new THREE.BoxGeometry(3.5, 0.7, 1.4),
-          couchMat
-        );
-        couch.position.set(-4.2, 0.35, -2.5);
-        couch.userData.originalPos = { x: -4.2, y: 0.35, z: -2.5 };
-        furniture.push(couch);
-        scene.add(couch);
-
-        // TV
-        const tvStand = new THREE.Mesh(
-          new THREE.BoxGeometry(2, 0.5, 0.4),
-          new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
-        );
-        tvStand.position.set(4.5, 0.25, -3);
-        furniture.push(tvStand);
-        scene.add(tvStand);
-
-        tvScreen = new THREE.Mesh(
-          new THREE.BoxGeometry(1.6, 1.0, 0.05),
-          new THREE.MeshStandardMaterial({
-            color: 0x2a3a4a,
-            emissive: 0x1a2a3a,
-            emissiveIntensity: 0.4,
-          })
-        );
-        tvScreen.position.set(4.35, 1.2, -3);
-        scene.add(tvScreen);
-
-        // ABSTRACT PAINTINGS
-        const abstract1 = new THREE.Mesh(
-          new THREE.BoxGeometry(0.9, 1.1, 0.02),
-          new THREE.MeshStandardMaterial({
-            color: 0xff6b6b,
-            emissive: 0xff6b6b,
-            emissiveIntensity: 0.2,
-          })
-        );
-        abstract1.position.set(-3.5, 2.3, -5.82);
-        abstract1.userData.originalRotation = { x: 0, y: 0, z: 0 };
-        abstractPaintings.push(abstract1);
-        scene.add(abstract1);
-
-        const abstract2 = new THREE.Mesh(
-          new THREE.BoxGeometry(1.3, 0.8, 0.02),
-          new THREE.MeshStandardMaterial({
-            color: 0x6ba3ff,
-            emissive: 0x6ba3ff,
-            emissiveIntensity: 0.2,
-          })
-        );
-        abstract2.position.set(3.5, 2.5, -5.82);
-        abstract2.userData.originalRotation = { x: 0, y: 0, z: 0 };
-        abstractPaintings.push(abstract2);
-        scene.add(abstract2);
+        Object.values(particles).forEach((p) => scene.add(p));
       }
 
-      function addFurniture() {
-        // COFFEE TABLE
-        coffeeTable = new THREE.Mesh(
-          new THREE.BoxGeometry(2.0, 0.08, 1.0),
-          new THREE.MeshStandardMaterial({ color: 0x4a3a2a, roughness: 0.6 })
-        );
-        coffeeTable.position.set(-2.8, 0.4, -1.5);
-        coffeeTable.userData.originalPos = { x: -2.8, y: 0.4, z: -1.5 };
-        furniture.push(coffeeTable);
-        scene.add(coffeeTable);
+      // BUILD ALL ROOMS
+      function buildAllRooms() {
+        Object.keys(ROOMS).forEach((roomId) => {
+          const grp = new THREE.Group();
+          grp.visible = false;
 
-        for (let x of [-0.85, 0.85]) {
-          for (let z of [-0.4, 0.4]) {
-            const leg = new THREE.Mesh(
-              new THREE.CylinderGeometry(0.04, 0.04, 0.35),
-              new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
+          const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+          grp.add(ambient);
+
+          const mainLight = new THREE.PointLight(0xffffcc, 1.2, 18);
+          mainLight.position.set(0, 3, 0);
+          grp.add(mainLight);
+
+          // Floor
+          const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(12, 12),
+            new THREE.MeshStandardMaterial({
+              color: getFloorColor(roomId),
+              roughness: 0.8,
+            })
+          );
+          floor.rotation.x = -Math.PI / 2;
+          grp.add(floor);
+
+          // Walls
+          const wallColor = getWallColor(roomId);
+          const wallMat = new THREE.MeshStandardMaterial({
+            color: wallColor,
+            roughness: 0.9,
+          });
+
+          const backWall = new THREE.Mesh(
+            new THREE.BoxGeometry(12, 3.5, 0.3),
+            wallMat.clone()
+          );
+          backWall.position.set(0, 1.75, -6);
+          grp.add(backWall);
+
+          const leftWall = new THREE.Mesh(
+            new THREE.BoxGeometry(0.3, 3.5, 12),
+            wallMat.clone()
+          );
+          leftWall.position.set(-6, 1.75, 0);
+          grp.add(leftWall);
+
+          const rightWall = new THREE.Mesh(
+            new THREE.BoxGeometry(0.3, 3.5, 12),
+            wallMat.clone()
+          );
+          rightWall.position.set(6, 1.75, 0);
+          grp.add(rightWall);
+
+          // Ceiling
+          const ceiling = new THREE.Mesh(
+            new THREE.PlaneGeometry(12, 12),
+            new THREE.MeshStandardMaterial({ color: getCeilingColor(roomId) })
+          );
+          ceiling.rotation.x = Math.PI / 2;
+          ceiling.position.y = 3.5;
+          grp.add(ceiling);
+
+          // Room-specific furniture
+          addRoomFurniture(grp, roomId);
+
+          roomObjects[roomId] = grp;
+          scene.add(grp);
+        });
+      }
+
+      // HELPER: Get room colors
+      function getFloorColor(roomId) {
+        const colors = {
+          hallway: 0x8a7a6a,
+          living: 0x5a4a3a,
+          bedroom: 0x4a3a4a,
+          study: 0x3a4a5a,
+          garden: 0x4a5a3a,
+          attic: 0x2a2a2a,
+        };
+        return colors[roomId] || 0x5a4a3a;
+      }
+
+      function getWallColor(roomId) {
+        const colors = {
+          hallway: 0xb8a898,
+          living: 0x8b7355,
+          bedroom: 0x6a5a6a,
+          study: 0x5a6a7a,
+          garden: 0x7a8a6a,
+          attic: 0x3a3a3a,
+        };
+        return colors[roomId] || 0x8b7355;
+      }
+
+      function getCeilingColor(roomId) {
+        const colors = {
+          hallway: 0xa09888,
+          living: 0x6a5a4a,
+          bedroom: 0x5a4a5a,
+          study: 0x4a5a6a,
+          garden: 0x6a7a5a,
+          attic: 0x2a2a2a,
+        };
+        return colors[roomId] || 0x6a5a4a;
+      }
+
+      // ADD ROOM-SPECIFIC FURNITURE
+      function addRoomFurniture(grp, roomId) {
+        if (roomId === "living") {
+          // Fireplace
+          const fireplace = new THREE.Mesh(
+            new THREE.BoxGeometry(2.5, 2, 0.6),
+            new THREE.MeshStandardMaterial({ color: 0x3a2a2a })
+          );
+          fireplace.position.set(0, 1, -5.7);
+          grp.add(fireplace);
+
+          const fireplaceLight = new THREE.PointLight(0xff6600, 1.5, 8);
+          fireplaceLight.position.set(0, 1, -5.5);
+          grp.add(fireplaceLight);
+
+          // Couch
+          const couch = new THREE.Mesh(
+            new THREE.BoxGeometry(3.5, 0.7, 1.4),
+            new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+          );
+          couch.position.set(-4, 0.35, -2.5);
+          grp.add(couch);
+        } else if (roomId === "bedroom") {
+          // Bed
+          const bed = new THREE.Mesh(
+            new THREE.BoxGeometry(2.5, 0.5, 3.5),
+            new THREE.MeshStandardMaterial({ color: 0x6a5a7a })
+          );
+          bed.position.set(-3, 0.25, -3);
+          grp.add(bed);
+        } else if (roomId === "study") {
+          // Desk
+          const desk = new THREE.Mesh(
+            new THREE.BoxGeometry(2, 0.1, 1),
+            new THREE.MeshStandardMaterial({ color: 0x4a3a2a })
+          );
+          desk.position.set(0, 0.8, -4);
+          grp.add(desk);
+
+          // Bookshelf
+          const bookshelf = new THREE.Mesh(
+            new THREE.BoxGeometry(1.5, 2.5, 0.4),
+            new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
+          );
+          bookshelf.position.set(5, 1.25, -3);
+          grp.add(bookshelf);
+        } else if (roomId === "garden") {
+          // Plants
+          for (let i = 0; i < 5; i++) {
+            const plant = new THREE.Mesh(
+              new THREE.ConeGeometry(0.2, 0.6, 8),
+              new THREE.MeshStandardMaterial({ color: 0x2d5016 })
             );
-            leg.position.set(-2.8 + x, 0.175, -1.5 + z);
-            scene.add(leg);
+            plant.position.set(
+              (Math.random() - 0.5) * 8,
+              0.3,
+              (Math.random() - 0.5) * 8
+            );
+            grp.add(plant);
+          }
+        } else if (roomId === "attic") {
+          // Boxes
+          for (let i = 0; i < 4; i++) {
+            const box = new THREE.Mesh(
+              new THREE.BoxGeometry(0.6, 0.6, 0.6),
+              new THREE.MeshStandardMaterial({ color: 0x4a3a2a })
+            );
+            box.position.set(
+              (Math.random() - 0.5) * 6,
+              0.3,
+              (Math.random() - 0.5) * 6
+            );
+            grp.add(box);
           }
         }
-
-        // RUG
-        rug = new THREE.Mesh(
-          new THREE.PlaneGeometry(4.5, 3.5),
-          new THREE.MeshStandardMaterial({ color: 0x6a4a3a, roughness: 0.9 })
-        );
-        rug.rotation.x = -Math.PI / 2;
-        rug.position.set(-3, 0.01, -2);
-        scene.add(rug);
-
-        // SIDE TABLE
-        sideTable = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.3, 0.3, 0.6),
-          new THREE.MeshStandardMaterial({ color: 0x5a4a3a })
-        );
-        sideTable.position.set(-5.3, 0.3, -1);
-        furniture.push(sideTable);
-        scene.add(sideTable);
-
-        // TABLE LAMP
-        tableLamp = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.15, 0.1, 0.4),
-          new THREE.MeshStandardMaterial({
-            color: 0xffffcc,
-            emissive: 0xffffaa,
-            emissiveIntensity: 0.5,
-          })
-        );
-        tableLamp.position.set(-5.3, 0.8, -1);
-        scene.add(tableLamp);
-
-        tableLampLight = new THREE.PointLight(0xffffcc, 0.8, 4);
-        tableLampLight.position.set(-5.3, 1.0, -1);
-        pointLights.push(tableLampLight);
-        scene.add(tableLampLight);
-
-        // BOOKSHELF
-        bookshelf = new THREE.Mesh(
-          new THREE.BoxGeometry(1.5, 2.5, 0.4),
-          new THREE.MeshStandardMaterial({ color: 0x4a3a2a })
-        );
-        bookshelf.position.set(5.6, 1.25, 2);
-        furniture.push(bookshelf);
-        scene.add(bookshelf);
-
-        // Books on shelf
-        for (let i = 0; i < 15; i++) {
-          const book = new THREE.Mesh(
-            new THREE.BoxGeometry(0.08, 0.3, 0.2),
-            new THREE.MeshStandardMaterial({
-              color: Math.random() > 0.5 ? 0x8b4513 : 0x654321,
-            })
-          );
-          const shelf = Math.floor(i / 5);
-          const pos = i % 5;
-          book.position.set(5.5 + (pos - 2) * 0.25, 0.5 + shelf * 0.7, 2);
-          book.userData.originalPos = {
-            x: book.position.x,
-            y: book.position.y,
-            z: book.position.z,
-          };
-          book.userData.hasFallen = false;
-          books.push(book);
-          scene.add(book);
-        }
-
-        // ARMCHAIR
-        armchair = new THREE.Mesh(
-          new THREE.BoxGeometry(1.2, 0.6, 1.2),
-          new THREE.MeshStandardMaterial({ color: 0x7a5a4a, roughness: 0.8 })
-        );
-        armchair.position.set(3.5, 0.3, 0.5);
-        armchair.userData.originalPos = { x: 3.5, y: 0.3, z: 0.5 };
-        furniture.push(armchair);
-        scene.add(armchair);
-
-        const backrest = new THREE.Mesh(
-          new THREE.BoxGeometry(1.2, 0.8, 0.2),
-          new THREE.MeshStandardMaterial({ color: 0x7a5a4a })
-        );
-        backrest.position.set(3.5, 0.7, 1);
-        scene.add(backrest);
-
-        // FLOOR LAMP
-        const lampPole = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.03, 0.03, 2.0),
-          new THREE.MeshStandardMaterial({ color: 0x2a2a2a })
-        );
-        lampPole.position.set(4.8, 1.0, 1.5);
-        scene.add(lampPole);
-
-        floorLamp = new THREE.Mesh(
-          new THREE.ConeGeometry(0.3, 0.5, 8),
-          new THREE.MeshStandardMaterial({
-            color: 0xffffcc,
-            emissive: 0xffffaa,
-            emissiveIntensity: 0.6,
-          })
-        );
-        floorLamp.position.set(4.8, 2.2, 1.5);
-        floorLamp.rotation.x = Math.PI;
-        scene.add(floorLamp);
-
-        floorLampLight = new THREE.PointLight(0xffffcc, 1.0, 6);
-        floorLampLight.position.set(4.8, 2.0, 1.5);
-        pointLights.push(floorLampLight);
-        scene.add(floorLampLight);
-
-        // POTTED PLANT
-        const pot = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.2, 0.15, 0.3),
-          new THREE.MeshStandardMaterial({ color: 0x8b4513 })
-        );
-        pot.position.set(-1, 0.15, -5.5);
-        scene.add(pot);
-
-        plant = new THREE.Group();
-        for (let i = 0; i < 8; i++) {
-          const leaf = new THREE.Mesh(
-            new THREE.SphereGeometry(0.15, 8, 8),
-            new THREE.MeshStandardMaterial({ color: 0x2d5016 })
-          );
-          const angle = (i / 8) * Math.PI * 2;
-          leaf.position.set(
-            Math.cos(angle) * 0.2,
-            0.3 + Math.random() * 0.3,
-            Math.sin(angle) * 0.2
-          );
-          leaf.scale.set(1, 1.5, 0.3);
-          leaf.userData.originalScale = { x: 1, y: 1.5, z: 0.3 };
-          leaf.userData.angle = angle;
-          plant.add(leaf);
-          plantLeaves.push(leaf);
-        }
-        plant.position.set(-1, 0.15, -5.5);
-        scene.add(plant);
-
-        // WINDOW
-        windowFrame = new THREE.Mesh(
-          new THREE.BoxGeometry(2.5, 2.0, 0.1),
-          new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
-        );
-        windowFrame.position.set(-5.85, 2, -3);
-        scene.add(windowFrame);
-
-        windowPane = new THREE.Mesh(
-          new THREE.PlaneGeometry(2.2, 1.7),
-          new THREE.MeshStandardMaterial({
-            color: 0x1a2a3a,
-            transparent: true,
-            opacity: 0.3,
-          })
-        );
-        windowPane.position.set(-5.84, 2, -3);
-        scene.add(windowPane);
-
-        curtain = new THREE.Mesh(
-          new THREE.PlaneGeometry(2.6, 2.2),
-          new THREE.MeshStandardMaterial({
-            color: 0x6a5a4a,
-            transparent: true,
-            opacity: 0.7,
-            side: THREE.DoubleSide,
-          })
-        );
-        curtain.position.set(-5.82, 2, -3);
-        scene.add(curtain);
-
-        // WALL CLOCK
-        const clockBase = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.35, 0.35, 0.05),
-          new THREE.MeshStandardMaterial({ color: 0x2a2a2a })
-        );
-        clockBase.rotation.x = Math.PI / 2;
-        clockBase.position.set(2, 2.8, -5.82);
-        scene.add(clockBase);
-
-        const clockFace = new THREE.Mesh(
-          new THREE.CircleGeometry(0.3, 32),
-          new THREE.MeshStandardMaterial({ color: 0xeeeeee })
-        );
-        clockFace.position.set(2, 2.8, -5.8);
-        scene.add(clockFace);
-
-        const hourHand = new THREE.Mesh(
-          new THREE.BoxGeometry(0.03, 0.15, 0.01),
-          new THREE.MeshStandardMaterial({ color: 0x000000 })
-        );
-        hourHand.position.set(2, 2.8, -5.78);
-        clockHands.push(hourHand);
-        scene.add(hourHand);
-
-        const minuteHand = new THREE.Mesh(
-          new THREE.BoxGeometry(0.02, 0.22, 0.01),
-          new THREE.MeshStandardMaterial({ color: 0x000000 })
-        );
-        minuteHand.position.set(2, 2.8, -5.77);
-        clockHands.push(minuteHand);
-        scene.add(minuteHand);
       }
 
-      function createParticleSystems() {
-        // Rain
-        const rainGeo = new THREE.BufferGeometry();
-        const rainPos = new Float32Array(2400);
-        for (let i = 0; i < 2400; i += 3) {
-          rainPos[i] = (Math.random() - 0.5) * 20;
-          rainPos[i + 1] = Math.random() * 10;
-          rainPos[i + 2] = (Math.random() - 0.5) * 20;
-        }
-        rainGeo.setAttribute("position", new THREE.BufferAttribute(rainPos, 3));
-        rainParticles = new THREE.Points(
-          rainGeo,
-          new THREE.PointsMaterial({
-            color: 0x6a9ccc,
-            size: 0.08,
-            transparent: true,
-            opacity: 0,
-          })
-        );
-        scene.add(rainParticles);
+      // ROOM VISIBILITY
+      function setRoomVisibility(roomId, visible) {
+        Object.keys(roomObjects).forEach((id) => {
+          roomObjects[id].visible = id === roomId;
+        });
+        currentRoom = roomId;
+        renderer.setClearColor(ROOMS[roomId].bg);
+        document.getElementById("current-room-name").textContent =
+          ROOMS[roomId].name;
 
-        // Mist
-        const mistGeo = new THREE.BufferGeometry();
-        const mistPos = new Float32Array(900);
-        for (let i = 0; i < 900; i += 3) {
-          mistPos[i] = (Math.random() - 0.5) * 15;
-          mistPos[i + 1] = Math.random() * 4;
-          mistPos[i + 2] = (Math.random() - 0.5) * 15;
-        }
-        mistGeo.setAttribute("position", new THREE.BufferAttribute(mistPos, 3));
-        mistParticles = new THREE.Points(
-          mistGeo,
-          new THREE.PointsMaterial({
-            color: 0xcccccc,
-            size: 0.4,
-            transparent: true,
-            opacity: 0,
-          })
-        );
-        scene.add(mistParticles);
-
-        // Sparkles (for love/excitement)
-        const sparkleGeo = new THREE.BufferGeometry();
-        const sparklePos = new Float32Array(600);
-        for (let i = 0; i < 600; i += 3) {
-          sparklePos[i] = (Math.random() - 0.5) * 12;
-          sparklePos[i + 1] = Math.random() * 4;
-          sparklePos[i + 2] = (Math.random() - 0.5) * 12;
-        }
-        sparkleGeo.setAttribute(
-          "position",
-          new THREE.BufferAttribute(sparklePos, 3)
-        );
-        sparkleParticles = new THREE.Points(
-          sparkleGeo,
-          new THREE.PointsMaterial({
-            color: 0xffaaff,
-            size: 0.12,
-            transparent: true,
-            opacity: 0,
-            blending: THREE.AdditiveBlending,
-          })
-        );
-        scene.add(sparkleParticles);
-
-        // Dust (for peace/contemplation)
-        const dustGeo = new THREE.BufferGeometry();
-        const dustPos = new Float32Array(450);
-        for (let i = 0; i < 450; i += 3) {
-          dustPos[i] = (Math.random() - 0.5) * 10;
-          dustPos[i + 1] = Math.random() * 3.5;
-          dustPos[i + 2] = (Math.random() - 0.5) * 10;
-        }
-        dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
-        dustParticles = new THREE.Points(
-          dustGeo,
-          new THREE.PointsMaterial({
-            color: 0xf0e68c,
-            size: 0.05,
-            transparent: true,
-            opacity: 0,
-          })
-        );
-        scene.add(dustParticles);
+        document.querySelectorAll(".nav-button").forEach((btn) => {
+          btn.classList.toggle("current-room", btn.dataset.room === roomId);
+        });
       }
 
-      function createLighting() {
-        scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-
-        const mainLight = new THREE.PointLight(0xffffcc, 1.2, 18);
-        mainLight.position.set(0, 3, -2);
-        pointLights.push(mainLight);
-        scene.add(mainLight);
-      }
-
-      // PHASE 1: EMOTION DETECTION
+      // EMOTION ANALYSIS
       function analyzeEmotion(text) {
         text = text.toLowerCase();
         let emotions = {};
         let intensity = 1.0;
 
         // Detect intensity
-        for (let level in INTENSITY_KEYWORDS) {
-          for (let keyword of INTENSITY_KEYWORDS[level]) {
+        for (let level in INTENSITY) {
+          for (let keyword of INTENSITY[level]) {
             if (text.includes(keyword)) {
-              if (level === "EXTREME") intensity = 2.0;
-              else if (level === "HIGH") intensity = 1.5;
-              else if (level === "MILD") intensity = 0.5;
+              intensity =
+                level === "EXTREME" ? 2.0 : level === "HIGH" ? 1.5 : 0.5;
               break;
             }
           }
         }
 
         // Detect emotions
-        for (let emotion in EMOTION_KEYWORDS) {
+        for (let emotion in EMOTIONS) {
           let score = 0;
-          for (let keyword of EMOTION_KEYWORDS[emotion].primary) {
-            if (text.includes(keyword)) score += 2;
+          for (let kw of EMOTIONS[emotion].pri) {
+            if (text.includes(kw)) score += 2;
           }
-          for (let keyword of EMOTION_KEYWORDS[emotion].secondary) {
-            if (text.includes(keyword)) score += 1;
+          for (let kw of EMOTIONS[emotion].sec) {
+            if (text.includes(kw)) score += 1;
           }
           if (score > 0) emotions[emotion] = score;
         }
@@ -1193,29 +758,21 @@
         // Normalize
         let total = Object.values(emotions).reduce((a, b) => a + b, 0);
         if (total > 0) {
-          for (let key in emotions) {
-            emotions[key] = emotions[key] / total;
-          }
-        }
-
-        // Default to neutral if nothing detected
-        if (Object.keys(emotions).length === 0) {
+          for (let key in emotions) emotions[key] /= total;
+        } else {
           emotions = { PEACE: 1.0 };
         }
 
         return { emotions, intensity };
       }
 
+      // ENTER HOUSE
       async function enterHouse() {
         const text = document.getElementById("user-input").value.trim();
         if (!text) {
           document.getElementById("error-msg").style.display = "block";
           return;
         }
-
-        document.getElementById("error-msg").style.display = "none";
-        document.getElementById("enter-btn").disabled = true;
-        document.getElementById("enter-btn").innerText = "Opening the door...";
 
         const analysis = analyzeEmotion(text);
         emotionBlend = analysis.emotions;
@@ -1228,11 +785,33 @@
         setTimeout(() => {
           document.getElementById("entrance").classList.add("hidden");
           document.getElementById("interior-ui").style.opacity = "1";
-          moveCamera(ROOM_CAMERA, 2000);
+          document.getElementById("room-navigation").style.opacity = "1";
+          moveCamera(ROOMS.hallway.camera, ROOMS.hallway.look, 2000);
         }, 1000);
       }
 
-      function moveCamera(target, duration) {
+      // NAVIGATE TO ROOM
+      function navigateToRoom(roomId) {
+        if (isTransitioning || roomId === currentRoom) return;
+        isTransitioning = true;
+
+        const overlay = document.getElementById("transition-overlay");
+        overlay.classList.add("active");
+
+        setTimeout(() => {
+          setRoomVisibility(roomId, true);
+          moveCamera(ROOMS[roomId].camera, ROOMS[roomId].look, 1000);
+          updateHouseAtmosphere();
+
+          setTimeout(() => {
+            overlay.classList.remove("active");
+            isTransitioning = false;
+          }, 600);
+        }, 600);
+      }
+
+      // MOVE CAMERA
+      function moveCamera(target, lookAt, duration) {
         const start = {
           x: camera.position.x,
           y: camera.position.y,
@@ -1246,18 +825,19 @@
             progress < 0.5
               ? 2 * progress * progress
               : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
           camera.position.x = start.x + (target.x - start.x) * eased;
           camera.position.y = start.y + (target.y - start.y) * eased;
           camera.position.z = start.z + (target.z - start.z) * eased;
-          camera.lookAt(0, 1.5, -3);
+          camera.lookAt(lookAt.x, lookAt.y, lookAt.z);
+
           if (progress < 1) requestAnimationFrame(update);
         }
         update();
       }
 
-      // PHASE 2 & 3: ATMOSPHERE APPLICATION
+      // UPDATE ATMOSPHERE
       function updateHouseAtmosphere() {
-        // Display current state
         let emotionText = Object.keys(emotionBlend)
           .map((e) => `${e} (${Math.round(emotionBlend[e] * 100)}%)`)
           .join(", ");
@@ -1276,746 +856,205 @@
           "intensity-display"
         ).innerText = `Intensity: ${intensityText}`;
 
-        // Reset all overlays
+        // Reset overlays
         document
           .querySelectorAll(
-            ".rain-overlay, .fog-overlay, .sunset-glow, .heat-wave, .frost-overlay, .love-glow, .dark-overlay"
+            ".rain-overlay, .fog-overlay, .sunset-glow, .heat-wave, .love-glow, .dark-overlay"
           )
           .forEach((el) => el.classList.remove("active"));
 
-        rainParticles.material.opacity = 0;
-        mistParticles.material.opacity = 0;
-        sparkleParticles.material.opacity = 0;
-        dustParticles.material.opacity = 0;
+        Object.values(particles).forEach((p) => (p.material.opacity = 0));
 
-        // Apply blended emotions
-        let targetHeight = 3.5;
-        let breathing = 0.05;
-        let bgColor = 0x2a2a3a;
-        let floorColor = 0x5a4a3a;
-        let wallColor = 0x8b7355;
-        shakeIntensity = 0;
+        // Apply emotion effects
+        emotionState = {
+          targetHeight: 3.5,
+          currentHeight: emotionState.currentHeight,
+          breathing: 0.05,
+          shake: 0,
+        };
 
-        // Blend each emotion's effects
         for (let emotion in emotionBlend) {
-          let weight = emotionBlend[emotion] * currentIntensity;
+          const weight = emotionBlend[emotion] * currentIntensity;
           applyEmotionEffect(emotion, weight);
         }
       }
 
+      // APPLY EMOTION EFFECTS
       function applyEmotionEffect(emotion, weight) {
         switch (emotion) {
           case "HAPPY":
-          case "EXCITEMENT":
-            targetCeilingHeight += (5.5 - 3.5) * weight;
-            breathingIntensity = Math.max(breathingIntensity, 0.03 * weight);
+            emotionState.targetHeight += (5.5 - 3.5) * weight;
             document.getElementById("sunset-glow").classList.add("active");
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0xffcc66, weight)
-            );
-            floor.material.color.setHex(
-              lerpColor(floor.material.color.getHex(), 0x7a6a4a, weight)
-            );
-            walls.forEach((w) =>
-              w.material.color.setHex(
-                lerpColor(w.material.color.getHex(), 0xa08860, weight)
-              )
-            );
-
-            fireplaceLight.intensity += 1.5 * weight;
-            fireParticles[0].material.opacity += 0.8 * weight;
-            floorLampLight.intensity += 1.2 * weight;
-            tableLampLight.intensity += 1.0 * weight;
-
-            tvScreen.material.emissive.setHex(
-              lerpColor(tvScreen.material.emissive.getHex(), 0x66ccff, weight)
-            );
-            tvScreen.material.emissiveIntensity += 0.6 * weight;
-
-            plantLeaves.forEach((leaf) => {
-              leaf.material.color.setHex(
-                lerpColor(leaf.material.color.getHex(), 0x3d7020, weight)
-              );
-              leaf.scale.x += 0.15 * weight;
-              leaf.scale.y += 0.3 * weight;
-            });
-
-            curtain.material.opacity = Math.max(
-              0.2,
-              curtain.material.opacity - 0.5 * weight
-            );
-
-            sparkleParticles.material.opacity += 0.4 * weight;
-            sparkleParticles.material.color.setHex(0xffee66);
+            particles.sparkle.material.opacity += 0.4 * weight;
+            particles.sparkle.material.color.setHex(0xffee66);
             break;
 
           case "LOVE":
-            targetCeilingHeight += (4.5 - 3.5) * weight;
-            breathingIntensity = Math.max(breathingIntensity, 0.04 * weight);
+            emotionState.targetHeight += (4.5 - 3.5) * weight;
             document.getElementById("love-glow").classList.add("active");
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0xffccdd, weight)
-            );
-
-            fireplaceLight.color.setHex(
-              lerpColor(fireplaceLight.color.getHex(), 0xff8888, weight)
-            );
-            fireplaceLight.intensity += 1.2 * weight;
-
-            abstractPaintings.forEach((p) => {
-              p.material.color.setHex(
-                lerpColor(p.material.color.getHex(), 0xffaacc, weight)
-              );
-              p.material.emissive.setHex(
-                lerpColor(p.material.emissive.getHex(), 0xff88bb, weight)
-              );
-              p.material.emissiveIntensity += 0.4 * weight;
-            });
-
-            sparkleParticles.material.opacity += 0.6 * weight;
-            sparkleParticles.material.color.setHex(0xffaaff);
-
-            plantLeaves.forEach((leaf, i) => {
-              leaf.material.color.setHex(
-                lerpColor(
-                  leaf.material.color.getHex(),
-                  0xff88aa,
-                  weight * 0.3 + 0x2d5016 * 0.7
-                )
-              );
-            });
+            particles.sparkle.material.opacity += 0.6 * weight;
+            particles.sparkle.material.color.setHex(0xffaaff);
             break;
 
           case "PEACE":
-            targetCeilingHeight += (4.0 - 3.5) * weight;
-            breathingIntensity = 0.02;
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0xd4d4e8, weight)
-            );
+            emotionState.targetHeight += (4.0 - 3.5) * weight;
+            emotionState.breathing = 0.02;
+            particles.dust.material.opacity += 0.3 * weight;
+            break;
 
-            fireplaceLight.intensity = Math.max(
-              0.8,
-              fireplaceLight.intensity - 0.4 * weight
-            );
-            floorLampLight.intensity = Math.max(
-              0.6,
-              floorLampLight.intensity - 0.2 * weight
-            );
-
-            dustParticles.material.opacity += 0.3 * weight;
-
-            walls.forEach((w) =>
-              w.material.color.setHex(
-                lerpColor(w.material.color.getHex(), 0xc8b8a8, weight)
-              )
-            );
-            floor.material.color.setHex(
-              lerpColor(floor.material.color.getHex(), 0x9a8a7a, weight)
-            );
+          case "HOPE":
+            emotionState.targetHeight += (4.5 - 3.5) * weight;
+            document.getElementById("sunset-glow").classList.add("active");
+            particles.dust.material.opacity += 0.4 * weight;
+            particles.dust.material.color.setHex(0xffffcc);
             break;
 
           case "ANXIETY":
-            targetCeilingHeight += (2.5 - 3.5) * weight;
-            breathingIntensity += 0.2 * weight;
-            shakeIntensity += 0.15 * weight;
-
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0x3a3a4a, weight)
-            );
-
-            pointLights.forEach((light, i) => {
-              if (Math.random() > 0.7) light.intensity *= 1 - 0.3 * weight;
-            });
-
-            clockHands.forEach(
-              (hand) => (hand.userData.speedMultiplier = 1 + 3 * weight)
-            );
-
-            books.forEach((book, i) => {
-              if (!book.userData.hasFallen && Math.random() < 0.3 * weight) {
-                book.position.y -= 0.5;
-                book.rotation.z = (Math.random() - 0.5) * 0.5;
-                book.userData.hasFallen = true;
-              }
-            });
+            emotionState.targetHeight += (2.5 - 3.5) * weight;
+            emotionState.breathing += 0.2 * weight;
+            emotionState.shake += 0.15 * weight;
             break;
 
           case "FEAR":
-            targetCeilingHeight += (2.8 - 3.5) * weight;
-            breathingIntensity += 0.15 * weight;
+            emotionState.targetHeight += (2.8 - 3.5) * weight;
+            emotionState.breathing += 0.15 * weight;
             document.getElementById("dark-overlay").classList.add("active");
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0x0a0a1a, weight)
-            );
-
-            walls.forEach((w) =>
-              w.material.color.setHex(
-                lerpColor(w.material.color.getHex(), 0x1a1a2a, weight)
-              )
-            );
-            floor.material.color.setHex(
-              lerpColor(floor.material.color.getHex(), 0x1a1a1a, weight)
-            );
-
-            fireplaceLight.color.setHex(
-              lerpColor(fireplaceLight.color.getHex(), 0x0066ff, weight)
-            );
-            fireplaceLight.intensity = Math.max(
-              0.3,
-              fireplaceLight.intensity - 0.7 * weight
-            );
-
-            pointLights.forEach((light) => {
-              if (Math.random() > 0.5) light.intensity *= 1 - 0.6 * weight;
-            });
-
-            abstractPaintings.forEach((p) => {
-              p.material.color.setHex(
-                lerpColor(p.material.color.getHex(), 0x1a1a1a, weight)
-              );
-              p.material.emissiveIntensity *= 1 - 0.8 * weight;
-            });
-
-            clockHands.forEach((hand) => (hand.userData.frozen = weight > 0.5));
             break;
 
           case "ANGER":
-          case "RAGE":
-            let rageIntensity = emotion === "RAGE" ? weight * 1.5 : weight;
-            targetCeilingHeight += (2.0 - 3.5) * rageIntensity;
-            breathingIntensity += 0.25 * rageIntensity;
-            shakeIntensity += 0.25 * rageIntensity;
-
+            emotionState.targetHeight += (2.0 - 3.5) * weight;
+            emotionState.breathing += 0.25 * weight;
+            emotionState.shake += 0.25 * weight;
             document.getElementById("heat-wave").classList.add("active");
-            renderer.setClearColor(
-              lerpColor(
-                renderer.getClearColor().getHex(),
-                0x4a1a1a,
-                rageIntensity
-              )
-            );
-
-            walls.forEach((w) =>
-              w.material.color.setHex(
-                lerpColor(w.material.color.getHex(), 0x3a1a1a, rageIntensity)
-              )
-            );
-            floor.material.color.setHex(
-              lerpColor(floor.material.color.getHex(), 0x2a0a0a, rageIntensity)
-            );
-
-            fireplaceLight.color.setHex(
-              lerpColor(fireplaceLight.color.getHex(), 0xff2200, rageIntensity)
-            );
-            fireplaceLight.intensity += 2.0 * rageIntensity;
-            fireParticles[0].material.color.setHex(0xff0000);
-            fireParticles[0].material.size = 0.15 + 0.15 * rageIntensity;
-
-            tvScreen.material.emissive.setHex(
-              lerpColor(
-                tvScreen.material.emissive.getHex(),
-                0xff0000,
-                rageIntensity
-              )
-            );
-
-            floorCracks.forEach(
-              (crack) => (crack.material.opacity += 0.8 * rageIntensity)
-            );
-
-            furniture.forEach((item, i) => {
-              if (item.userData.originalPos && rageIntensity > 0.7) {
-                item.rotation.z += (Math.random() - 0.5) * 0.3 * rageIntensity;
-                item.position.x += (Math.random() - 0.5) * 0.5 * rageIntensity;
-              }
-            });
-
-            abstractPaintings.forEach((p) => {
-              p.material.color.setHex(
-                lerpColor(p.material.color.getHex(), 0x8b0000, rageIntensity)
-              );
-              p.rotation.z += (Math.random() - 0.5) * 0.4 * rageIntensity;
-            });
             break;
 
           case "SADNESS":
           case "GRIEF":
-            let griefIntensity = emotion === "GRIEF" ? weight * 1.3 : weight;
-            targetCeilingHeight += (2.8 - 3.5) * griefIntensity;
-            breathingIntensity = Math.max(
+            emotionState.targetHeight += (2.8 - 3.5) * weight;
+            emotionState.breathing = Math.max(
               0.06,
-              breathingIntensity * (1 - 0.3 * griefIntensity)
+              emotionState.breathing * (1 - 0.3 * weight)
             );
-
             document.getElementById("rain-overlay").classList.add("active");
-            rainParticles.material.opacity += 0.6 * griefIntensity;
-
-            if (emotion === "GRIEF") {
-              renderer.setClearColor(
-                lerpColor(
-                  renderer.getClearColor().getHex(),
-                  0x4a4a4a,
-                  griefIntensity
-                )
-              );
-              walls.forEach((w) =>
-                w.material.color.setHex(
-                  lerpColor(w.material.color.getHex(), 0x4a4a4a, griefIntensity)
-                )
-              );
-              floor.material.color.setHex(
-                lerpColor(
-                  floor.material.color.getHex(),
-                  0x3a3a3a,
-                  griefIntensity
-                )
-              );
-            } else {
-              renderer.setClearColor(
-                lerpColor(
-                  renderer.getClearColor().getHex(),
-                  0x3a4a5a,
-                  griefIntensity
-                )
-              );
-              walls.forEach((w) =>
-                w.material.color.setHex(
-                  lerpColor(w.material.color.getHex(), 0x6a6a7a, griefIntensity)
-                )
-              );
-            }
-
-            fireplaceLight.intensity = Math.max(
-              0.2,
-              fireplaceLight.intensity - 0.9 * griefIntensity
-            );
-            fireParticles[0].material.opacity = Math.max(
-              0.1,
-              fireParticles[0].material.opacity - 0.6 * griefIntensity
-            );
-
-            plantLeaves.forEach((leaf, i) => {
-              leaf.material.color.setHex(
-                lerpColor(
-                  leaf.material.color.getHex(),
-                  0x1a2a0a,
-                  griefIntensity
-                )
-              );
-              leaf.scale.y = Math.max(0.8, leaf.scale.y - 0.4 * griefIntensity);
-              leaf.rotation.z += Math.sin(i) * 0.3 * griefIntensity;
-            });
-
-            abstractPaintings.forEach((p) => {
-              p.rotation.z -= 0.15 * griefIntensity;
-              p.material.emissiveIntensity *= 1 - 0.7 * griefIntensity;
-            });
-
-            curtain.material.opacity = Math.min(
-              0.95,
-              curtain.material.opacity + 0.3 * griefIntensity
-            );
+            particles.rain.material.opacity += 0.6 * weight;
             break;
 
           case "LONELINESS":
-            targetCeilingHeight += (5.0 - 3.5) * weight;
-            breathingIntensity = 0.02;
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0x1a1a2a, weight)
-            );
-
-            pointLights.forEach((light) => {
-              if (light !== fireplaceLight) {
-                light.intensity *= 1 - 0.7 * weight;
-              }
-            });
-
-            fireplaceLight.intensity = Math.max(
-              0.4,
-              fireplaceLight.intensity - 0.5 * weight
-            );
-            fireplaceLight.distance = 4;
-
-            furniture.forEach((item) => {
-              if (item.userData.originalPos) {
-                let dx = item.userData.originalPos.x - 0;
-                let dz = item.userData.originalPos.z - 0;
-                item.position.x += dx * 0.3 * weight;
-                item.position.z += dz * 0.3 * weight;
-                item.scale.set(
-                  1 - 0.2 * weight,
-                  1 - 0.2 * weight,
-                  1 - 0.2 * weight
-                );
-              }
-            });
-
+            emotionState.targetHeight += (5.0 - 3.5) * weight;
+            emotionState.breathing = 0.02;
             scene.fog.near = 8 - 3 * weight;
             scene.fog.far = 20 - 5 * weight;
             break;
 
-          case "CONFUSION":
-            targetCeilingHeight += Math.sin(Date.now() * 0.001) * 0.5 * weight;
-            breathingIntensity += 0.06 * weight;
-
-            document.getElementById("fog-overlay").classList.add("active");
-            mistParticles.material.opacity += 0.7 * weight;
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0x8a8a8a, weight)
-            );
-
-            walls.forEach((w, i) => {
-              w.rotation.z = Math.sin(Date.now() * 0.001 + i) * 0.02 * weight;
-            });
-
-            abstractPaintings.forEach((p) => {
-              p.rotation.z = Math.sin(Date.now() * 0.002) * 0.3 * weight;
-            });
-
-            clockHands.forEach((hand, i) => {
-              hand.userData.erratic = weight;
-            });
-            break;
-
-          case "EXHAUSTION":
-            targetCeilingHeight += (3.0 - 3.5) * weight;
-            breathingIntensity = Math.max(
-              0.03,
-              breathingIntensity - 0.02 * weight
-            );
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0x4a4a5a, weight)
-            );
-
-            pointLights.forEach(
-              (light) => (light.intensity *= 1 - 0.5 * weight)
-            );
-
-            furniture.forEach((item) => {
-              if (item.userData.originalPos) {
-                item.position.y = item.userData.originalPos.y - 0.1 * weight;
-                item.rotation.x = -0.05 * weight;
-              }
-            });
-
-            plantLeaves.forEach((leaf) => {
-              leaf.rotation.z += 0.2 * weight;
-              leaf.scale.y *= 1 - 0.3 * weight;
-            });
-
-            clockHands.forEach(
-              (hand) => (hand.userData.speedMultiplier = 1 - 0.7 * weight)
-            );
-            break;
-
-          case "GUILT":
-            targetCeilingHeight += (2.5 - 3.5) * weight;
-            breathingIntensity += 0.1 * weight;
-            document.getElementById("dark-overlay").classList.add("active");
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0x2a1a1a, weight)
-            );
-
-            walls.forEach((w) =>
-              w.material.color.setHex(
-                lerpColor(w.material.color.getHex(), 0x3a2a2a, weight)
-              )
-            );
-
-            abstractPaintings.forEach((p) => {
-              p.rotation.z -= 0.2 * weight;
-              p.material.color.setHex(
-                lerpColor(p.material.color.getHex(), 0x4a2a2a, weight)
-              );
-            });
-
-            pointLights.forEach((light, i) => {
-              if (i > 0) light.intensity *= 1 - 0.6 * weight;
-            });
-            break;
-
-          case "HOPE":
-            targetCeilingHeight += (4.5 - 3.5) * weight;
-            breathingIntensity = 0.03;
-            document.getElementById("sunset-glow").classList.add("active");
-
-            windowPane.material.color.setHex(
-              lerpColor(windowPane.material.color.getHex(), 0xffeeaa, weight)
-            );
-            windowPane.material.opacity = 0.6 * weight;
-
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0xffeebb, weight)
-            );
-
-            dustParticles.material.opacity += 0.4 * weight;
-            dustParticles.material.color.setHex(0xffffcc);
-
-            fireplaceLight.intensity += 0.8 * weight;
-            floorLampLight.intensity += 0.6 * weight;
-
-            plantLeaves.forEach((leaf) => {
-              leaf.scale.y += 0.2 * weight;
-              leaf.material.color.setHex(
-                lerpColor(leaf.material.color.getHex(), 0x4d7030, weight)
-              );
-            });
-            break;
-
-          case "PROUD":
-            targetCeilingHeight += (5.5 - 3.5) * weight;
-            breathingIntensity = 0.02;
-            renderer.setClearColor(
-              lerpColor(
-                renderer.getClearColor().getHex(),
-                0xffd700,
-                weight * 0.3 + 0x2a2a3a * 0.7
-              )
-            );
-
-            walls.forEach((w) => {
-              w.material.color.setHex(
-                lerpColor(w.material.color.getHex(), 0xa08860, weight)
-              );
-              w.position.y += 0.1 * weight;
-            });
-
-            furniture.forEach((item) => {
-              if (item.userData.originalPos) {
-                item.position.y = item.userData.originalPos.y + 0.05 * weight;
-              }
-            });
-
-            pointLights.forEach((light) => (light.intensity += 0.5 * weight));
-
-            abstractPaintings.forEach((p) => {
-              p.material.emissiveIntensity += 0.5 * weight;
-              p.scale.set(1 + 0.1 * weight, 1 + 0.1 * weight, 1);
-            });
-            break;
-
           case "NOSTALGIA":
-            targetCeilingHeight += (3.2 - 3.5) * weight;
-            breathingIntensity = 0.04;
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0x9a8a7a, weight)
-            );
-
-            walls.forEach((w) =>
-              w.material.color.setHex(
-                lerpColor(w.material.color.getHex(), 0x8a7a6a, weight)
-              )
-            );
-            floor.material.color.setHex(
-              lerpColor(floor.material.color.getHex(), 0x7a6a5a, weight)
-            );
-
-            abstractPaintings.forEach((p) => {
-              p.material.color.setHex(
-                lerpColor(p.material.color.getHex(), 0x8a7a6a, weight)
-              );
-              p.material.opacity = 0.8;
-            });
-
-            dustParticles.material.opacity += 0.5 * weight;
-            dustParticles.material.color.setHex(0xd4c4a4);
-
-            fireplaceLight.color.setHex(
-              lerpColor(fireplaceLight.color.getHex(), 0xcc8844, weight)
-            );
+            emotionState.targetHeight += (3.2 - 3.5) * weight;
+            emotionState.breathing = 0.04;
+            particles.dust.material.opacity += 0.5 * weight;
+            particles.dust.material.color.setHex(0xd4c4a4);
             break;
 
           case "CONTEMPLATION":
-            targetCeilingHeight += (4.0 - 3.5) * weight;
-            breathingIntensity = 0.025;
-            renderer.setClearColor(
-              lerpColor(renderer.getClearColor().getHex(), 0x3a4a5a, weight)
-            );
-
-            dustParticles.material.opacity += 0.4 * weight;
-
-            bookshelf.material.emissive = new THREE.Color(0x4a5a6a);
-            bookshelf.material.emissiveIntensity = 0.3 * weight;
-
-            books.forEach((book) => {
-              book.position.y =
-                book.userData.originalPos.y +
-                Math.sin(Date.now() * 0.001) * 0.05 * weight;
-              book.rotation.y = Math.sin(Date.now() * 0.0005) * 0.1 * weight;
-            });
-
-            clockHands.forEach((hand) => (hand.userData.speedMultiplier = 0.5));
+            emotionState.targetHeight += (4.0 - 3.5) * weight;
+            emotionState.breathing = 0.025;
+            particles.dust.material.opacity += 0.4 * weight;
+            document.getElementById("fog-overlay").classList.add("active");
+            particles.mist.material.opacity += 0.3 * weight;
             break;
         }
       }
 
-      function lerpColor(color1, color2, t) {
-        const c1 = new THREE.Color(color1);
-        const c2 = new THREE.Color(color2);
-        return c1.lerp(c2, t).getHex();
-      }
-
-      // PHASE 4: ANIMATION & TIME-BASED EVOLUTION
+      // ANIMATION LOOP
       function animate() {
         requestAnimationFrame(animate);
         const time = clock.getElapsedTime();
         const delta = clock.getDelta();
 
-        if (hasEntered) {
-          timeInEmotion += delta;
-
-          // Ceiling breathing
-          currentCeilingHeight = THREE.MathUtils.lerp(
-            currentCeilingHeight,
-            targetCeilingHeight,
+        if (hasEntered && !isTransitioning) {
+          // Smooth ceiling height transition
+          emotionState.currentHeight = THREE.MathUtils.lerp(
+            emotionState.currentHeight,
+            emotionState.targetHeight,
             0.02
           );
-          ceiling.position.y =
-            currentCeilingHeight + Math.sin(time * 0.5) * breathingIntensity;
 
-          // Walls breathing
-          walls.forEach((wall, i) => {
-            wall.scale.set(
-              1 + Math.sin(time * 0.3 + i) * breathingIntensity * 0.5,
-              currentCeilingHeight / 3.5,
-              1 + Math.sin(time * 0.5 + i) * breathingIntensity
-            );
-            wall.position.y = currentCeilingHeight / 2;
-          });
+          // Breathing effect on current room's ceiling
+          if (roomObjects[currentRoom]) {
+            roomObjects[currentRoom].children.forEach((child) => {
+              if (
+                child.geometry &&
+                child.geometry.type === "PlaneGeometry" &&
+                child.rotation.x > 3
+              ) {
+                child.position.y =
+                  emotionState.currentHeight +
+                  Math.sin(time * 0.5) * emotionState.breathing;
+              }
+            });
+          }
 
           // Camera shake
-          if (shakeIntensity > 0.01) {
+          if (emotionState.shake > 0.01) {
+            const roomCam = ROOMS[currentRoom].camera;
             camera.position.x =
-              ROOM_CAMERA.x + Math.sin(time * 50) * shakeIntensity;
+              roomCam.x + Math.sin(time * 50) * emotionState.shake;
             camera.position.y =
-              ROOM_CAMERA.y + Math.cos(time * 40) * shakeIntensity;
-            camera.rotation.z = Math.sin(time * 30) * shakeIntensity * 0.01;
+              roomCam.y + Math.cos(time * 40) * emotionState.shake;
+            camera.rotation.z = Math.sin(time * 30) * emotionState.shake * 0.01;
           } else {
+            const roomCam = ROOMS[currentRoom].camera;
             camera.position.x = THREE.MathUtils.lerp(
               camera.position.x,
-              ROOM_CAMERA.x,
+              roomCam.x,
               0.1
             );
             camera.position.y = THREE.MathUtils.lerp(
               camera.position.y,
-              ROOM_CAMERA.y,
+              roomCam.y,
               0.1
             );
             camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, 0, 0.1);
           }
 
-          // Fire animation
-          if (fireParticles[0].material.opacity > 0.05) {
-            const pos = fireParticles[0].geometry.attributes.position.array;
+          // Animate particles
+          if (particles.rain.material.opacity > 0) {
+            const pos = particles.rain.geometry.attributes.position.array;
+            for (let i = 1; i < pos.length; i += 3) {
+              pos[i] -= 0.15;
+              if (pos[i] < 0) pos[i] = 10;
+            }
+            particles.rain.geometry.attributes.position.needsUpdate = true;
+          }
+
+          if (particles.mist.material.opacity > 0) {
+            const pos = particles.mist.geometry.attributes.position.array;
             for (let i = 0; i < pos.length; i += 3) {
-              pos[i + 1] += 0.02 + Math.random() * 0.01;
-              pos[i] += (Math.random() - 0.5) * 0.01;
-              if (pos[i + 1] > 1.5) {
-                pos[i + 1] = 0.2;
-                pos[i] = (Math.random() - 0.5) * 1.5;
-              }
+              pos[i + 1] += 0.008;
+              pos[i] += Math.sin(time + i) * 0.002;
+              if (pos[i + 1] > 4) pos[i + 1] = 0;
             }
-            fireParticles[0].geometry.attributes.position.needsUpdate = true;
-            fireplaceLight.intensity += Math.sin(time * 10) * 0.1;
+            particles.mist.geometry.attributes.position.needsUpdate = true;
           }
 
-          // Curtain sway
-          if (curtain) {
-            curtain.position.x = -5.82 + Math.sin(time * 0.8) * 0.02;
-            curtain.rotation.y = Math.sin(time * 1.2) * 0.03;
-          }
-
-          // Clock hands
-          if (clockHands.length > 0) {
-            clockHands.forEach((hand, i) => {
-              if (hand.userData.frozen) {
-                // Frozen for fear
-              } else if (hand.userData.erratic) {
-                // Erratic for confusion
-                hand.rotation.z -=
-                  (0.1 + Math.sin(time * 5) * 0.5) * hand.userData.erratic;
-              } else {
-                let speed = hand.userData.speedMultiplier || 1;
-                hand.rotation.z -= (i === 0 ? 0.1 : 0.5) * speed * delta;
-              }
-            });
-          }
-
-          // Plant subtle movement
-          plantLeaves.forEach((leaf, i) => {
-            leaf.position.x =
-              Math.cos(leaf.userData.angle) * 0.2 +
-              Math.sin(time * 0.5 + i) * 0.01;
-            leaf.position.z =
-              Math.sin(leaf.userData.angle) * 0.2 +
-              Math.cos(time * 0.5 + i) * 0.01;
-          });
-
-          // Furniture gentle settling
-          furniture.forEach((item) => {
-            if (item.userData.originalPos) {
-              item.position.x = THREE.MathUtils.lerp(
-                item.position.x,
-                item.userData.originalPos.x,
-                0.01
-              );
-              item.position.y = THREE.MathUtils.lerp(
-                item.position.y,
-                item.userData.originalPos.y,
-                0.01
-              );
-              item.position.z = THREE.MathUtils.lerp(
-                item.position.z,
-                item.userData.originalPos.z,
-                0.01
-              );
-              item.rotation.z = THREE.MathUtils.lerp(item.rotation.z, 0, 0.01);
+          if (particles.sparkle.material.opacity > 0) {
+            const pos = particles.sparkle.geometry.attributes.position.array;
+            for (let i = 0; i < pos.length; i += 3) {
+              pos[i + 1] += Math.sin(time * 2 + i) * 0.01;
+              pos[i] += Math.cos(time * 1.5 + i) * 0.01;
+              pos[i + 2] += Math.sin(time * 1.8 + i) * 0.01;
             }
-          });
-        }
-
-        // Rain animation
-        if (rainParticles.material.opacity > 0) {
-          const pos = rainParticles.geometry.attributes.position.array;
-          for (let i = 1; i < pos.length; i += 3) {
-            pos[i] -= 0.15;
-            if (pos[i] < 0) pos[i] = 10;
+            particles.sparkle.geometry.attributes.position.needsUpdate = true;
+            particles.sparkle.material.size = 0.12 + Math.sin(time * 3) * 0.05;
           }
-          rainParticles.geometry.attributes.position.needsUpdate = true;
-        }
 
-        // Mist animation
-        if (mistParticles.material.opacity > 0) {
-          const pos = mistParticles.geometry.attributes.position.array;
-          for (let i = 0; i < pos.length; i += 3) {
-            pos[i + 1] += 0.008;
-            pos[i] += Math.sin(time + i) * 0.002;
-            if (pos[i + 1] > 4) pos[i + 1] = 0;
+          if (particles.dust.material.opacity > 0) {
+            const pos = particles.dust.geometry.attributes.position.array;
+            for (let i = 0; i < pos.length; i += 3) {
+              pos[i + 1] += 0.003;
+              pos[i] += Math.sin(time * 0.5 + i) * 0.003;
+              if (pos[i + 1] > 3.5) pos[i + 1] = 0.2;
+            }
+            particles.dust.geometry.attributes.position.needsUpdate = true;
           }
-          mistParticles.geometry.attributes.position.needsUpdate = true;
-        }
-
-        // Sparkle animation
-        if (sparkleParticles.material.opacity > 0) {
-          const pos = sparkleParticles.geometry.attributes.position.array;
-          for (let i = 0; i < pos.length; i += 3) {
-            pos[i + 1] += Math.sin(time * 2 + i) * 0.01;
-            pos[i] += Math.cos(time * 1.5 + i) * 0.01;
-            pos[i + 2] += Math.sin(time * 1.8 + i) * 0.01;
-          }
-          sparkleParticles.geometry.attributes.position.needsUpdate = true;
-          sparkleParticles.material.size = 0.12 + Math.sin(time * 3) * 0.05;
-        }
-
-        // Dust animation
-        if (dustParticles.material.opacity > 0) {
-          const pos = dustParticles.geometry.attributes.position.array;
-          for (let i = 0; i < pos.length; i += 3) {
-            pos[i + 1] += 0.003;
-            pos[i] += Math.sin(time * 0.5 + i) * 0.003;
-            if (pos[i + 1] > 3.5) pos[i + 1] = 0.2;
-          }
-          dustParticles.geometry.attributes.position.needsUpdate = true;
         }
 
         renderer.render(scene, camera);
