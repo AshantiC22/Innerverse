@@ -1,126 +1,17 @@
 [
     {
-        "weather": "STEADY RAIN",
-        "score": -0.5
-    },
-    {
-        "weather": "FOGGY MIST",
-        "score": -0.1
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": -0.5
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": -0.24
-    },
-    {
+        "timestamp": "2026-01-13T15:47:38.038661",
         "weather": "THUNDERSTORM",
-        "score": -1.5
+        "score": -0.62
     },
     {
+        "timestamp": "2026-01-13T15:47:57.101699",
         "weather": "THUNDERSTORM",
-        "score": -0.65
+        "score": -0.62
     },
     {
+        "timestamp": "2026-01-13T15:48:10.364941",
         "weather": "THUNDERSTORM",
-        "score": 0.14
-    },
-    {
-        "weather": "THUNDERSTORM",
-        "score": 0.14
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": -0.34
-    },
-    {
-        "weather": "THUNDERSTORM",
-        "score": 0.0
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": 0.2
-    },
-    {
-        "weather": "THUNDERSTORM",
-        "score": 0.38
-    },
-    {
-        "weather": "THUNDERSTORM",
-        "score": 0.38
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": -0.26
-    },
-    {
-        "weather": "RADIANT SUN",
-        "score": 0.6
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": -0.25
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": -0.25
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": -0.25
-    },
-    {
-        "weather": "FOGGY MIST",
-        "score": -0.25
-    },
-    {
-        "weather": "FOGGY MIST",
-        "score": -0.25
-    },
-    {
-        "weather": "FOGGY MIST",
-        "score": -0.25
-    },
-    {
-        "weather": "THUNDERSTORM",
-        "score": -0.7
-    },
-    {
-        "weather": "FOGGY MIST",
-        "score": 0.0
-    },
-    {
-        "weather": "FOGGY MIST",
-        "score": 0.0
-    },
-    {
-        "weather": "THUNDERSTORM",
-        "score": -0.5
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": -0.25
-    },
-    {
-        "weather": "RADIANT SUN",
-        "score": 0.0
-    },
-    {
-        "weather": "FOGGY MIST",
-        "score": -0.25
-    },
-    {
-        "weather": "THUNDERSTORM",
-        "score": -0.5
-    },
-    {
-        "weather": "STEADY RAIN",
-        "score": -0.4
-    },
-    {
-        "weather": "THUNDERSTORM",
-        "score": -0.5
+        "score": -0.62
     }
 ]
