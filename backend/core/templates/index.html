@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Innerverse | The Living House - Multi-Room</title>
+    <title>Innerverse | The Living House</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
       body,
@@ -109,7 +109,7 @@
         letter-spacing: 2px;
       }
 
-      button:hover {
+      button:hover:not(:disabled) {
         transform: translateY(-3px);
         box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
       }
@@ -136,19 +136,22 @@
         padding: 25px 40px;
         border-radius: 15px;
         backdrop-filter: blur(10px);
+        border: 1px solid rgba(100, 100, 120, 0.3);
         color: white;
+        min-width: 300px;
       }
 
       #room-status {
         margin: 0 0 5px 0;
-        font-size: 1.1em;
+        font-size: 1em;
         letter-spacing: 2px;
+        color: rgba(255, 255, 255, 0.6);
       }
 
       #current-room-name {
         margin: 5px 0 10px 0;
-        font-size: 1.3em;
-        color: rgba(160, 192, 224, 0.9);
+        font-size: 1.4em;
+        color: rgba(160, 192, 224, 0.95);
         letter-spacing: 1px;
         font-weight: bold;
       }
@@ -194,7 +197,7 @@
         pointer-events: none;
         z-index: 3;
         opacity: 0;
-        transition: opacity 1.5s ease;
+        transition: opacity 2s ease;
       }
 
       .rain-overlay.active,
@@ -228,6 +231,17 @@
           rgba(255, 100, 50, 0.2),
           transparent
         );
+        animation: heatShimmer 2s ease-in-out infinite;
+      }
+
+      @keyframes heatShimmer {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
       }
 
       .love-glow {
@@ -236,6 +250,17 @@
           rgba(255, 150, 200, 0.4),
           transparent 70%
         );
+        animation: heartPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes heartPulse {
+        0%,
+        100% {
+          opacity: 0.8;
+        }
+        50% {
+          opacity: 1;
+        }
       }
 
       .dark-overlay {
@@ -258,8 +283,8 @@
       .nav-button {
         display: block;
         margin: 8px 0;
-        padding: 10px 20px;
-        background: rgba(30, 30, 40, 0.8);
+        padding: 12px 24px;
+        background: rgba(30, 30, 40, 0.85);
         border: 2px solid rgba(100, 100, 120, 0.4);
         color: white;
         border-radius: 8px;
@@ -268,17 +293,20 @@
         transition: all 0.3s ease;
         backdrop-filter: blur(10px);
         letter-spacing: 1px;
+        font-weight: bold;
+        text-transform: uppercase;
       }
 
       .nav-button:hover {
-        background: rgba(50, 50, 60, 0.9);
-        border-color: rgba(160, 192, 224, 0.6);
+        background: rgba(50, 50, 60, 0.95);
+        border-color: rgba(160, 192, 224, 0.7);
         transform: translateX(-5px);
       }
 
       .nav-button.current-room {
-        background: rgba(102, 126, 234, 0.4);
-        border-color: rgba(102, 126, 234, 0.8);
+        background: rgba(102, 126, 234, 0.5);
+        border-color: rgba(102, 126, 234, 0.9);
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
       }
 
       .error-message {
@@ -286,6 +314,35 @@
         font-size: 13px;
         margin-top: 10px;
         display: none;
+      }
+
+      .room-description {
+        position: fixed;
+        top: 30px;
+        left: 30px;
+        z-index: 5;
+        opacity: 0;
+        transition: opacity 2s ease;
+        max-width: 300px;
+        background: rgba(20, 20, 30, 0.85);
+        padding: 20px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(100, 100, 120, 0.3);
+      }
+
+      .room-description h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.2em;
+        color: rgba(160, 192, 224, 0.95);
+        letter-spacing: 1px;
+      }
+
+      .room-description p {
+        margin: 0;
+        font-size: 0.9em;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.7);
       }
     </style>
   </head>
@@ -314,6 +371,13 @@
       </div>
     </div>
 
+    <div id="room-description" class="room-description">
+      <h3 id="desc-title">Central Hallway</h3>
+      <p id="desc-text">
+        A neutral space connecting all rooms of your inner world.
+      </p>
+    </div>
+
     <div id="interior-ui" class="room-ui">
       <h2 id="room-status">Emotions</h2>
       <p id="current-room-name">Hallway</p>
@@ -325,7 +389,7 @@
       <button class="nav-button current-room" data-room="hallway">
         Hallway
       </button>
-      <button class="nav-button" data-room="living">Living Room</button>
+      <button class="nav-button" data-room="living">Living</button>
       <button class="nav-button" data-room="bedroom">Bedroom</button>
       <button class="nav-button" data-room="study">Study</button>
       <button class="nav-button" data-room="garden">Garden</button>
@@ -344,7 +408,8 @@
       let hasEntered = false,
         isTransitioning = false;
       let roomObjects = {},
-        particles = {};
+        particles = {},
+        roomLights = {};
       let emotionState = {
         targetHeight: 3.5,
         currentHeight: 3.5,
@@ -405,54 +470,82 @@
       };
 
       const INTENSITY = {
-        EXTREME: ["very", "extremely", "incredibly", "completely"],
+        EXTREME: ["very", "extremely", "incredibly", "completely", "utterly"],
         HIGH: ["really", "quite", "pretty", "fairly"],
         MILD: ["a little", "a bit", "somewhat", "slightly"],
       };
 
-      // ROOM DEFINITIONS
+      // ROOM DEFINITIONS - Enhanced
       const ROOMS = {
         hallway: {
           name: "Central Hallway",
+          description:
+            "A neutral passage connecting all rooms of your inner world.",
           emotions: [],
           camera: { x: 0, y: 1.6, z: 6 },
           look: { x: 0, y: 1.5, z: 0 },
           bg: 0x2a2a3a,
+          ambientIntensity: 0.4,
+          mainLightColor: 0xffffcc,
+          mainLightIntensity: 1.0,
         },
         living: {
           name: "Living Room",
+          description:
+            "Where daily emotions gather by the warmth of the hearth.",
           emotions: ["HAPPY", "LOVE", "ANGER", "SADNESS"],
-          camera: { x: 0, y: 1.6, z: 4 },
-          look: { x: 0, y: 1.5, z: -3 },
+          camera: { x: 0, y: 2, z: 4 },
+          look: { x: 0, y: 1.8, z: -3 },
           bg: 0x2a2a3a,
+          ambientIntensity: 0.3,
+          mainLightColor: 0xffffcc,
+          mainLightIntensity: 1.2,
         },
         bedroom: {
           name: "Bedroom of Memories",
+          description:
+            "Where past moments rest and dreams of yesterday linger.",
           emotions: ["NOSTALGIA", "GRIEF", "LONELINESS"],
           camera: { x: 0, y: 1.6, z: 5 },
           look: { x: 0, y: 1.2, z: -2 },
           bg: 0x1a1a2a,
+          ambientIntensity: 0.25,
+          mainLightColor: 0xccbbdd,
+          mainLightIntensity: 0.8,
         },
         study: {
           name: "Study",
+          description:
+            "A quiet space for introspection and intellectual pursuit.",
           emotions: ["CONTEMPLATION", "ANXIETY"],
           camera: { x: -2, y: 1.6, z: 4 },
           look: { x: 0, y: 1.5, z: -2 },
           bg: 0x2a3a4a,
+          ambientIntensity: 0.35,
+          mainLightColor: 0xaabbcc,
+          mainLightIntensity: 1.0,
         },
         garden: {
           name: "Inner Garden",
+          description: "A living sanctuary where hope grows and peace blooms.",
           emotions: ["HOPE", "PEACE", "LOVE"],
           camera: { x: 0, y: 1.8, z: 6 },
           look: { x: 0, y: 1.0, z: 0 },
           bg: 0x3a4a3a,
+          ambientIntensity: 0.45,
+          mainLightColor: 0xddffcc,
+          mainLightIntensity: 1.3,
         },
         attic: {
           name: "Attic of Shadows",
+          description: "Where fears are stored and anxieties collect dust.",
           emotions: ["FEAR", "ANXIETY"],
           camera: { x: 0, y: 1.4, z: 5 },
           look: { x: 0, y: 1.8, z: -2 },
           bg: 0x0a0a1a,
+          ambientIntensity: 0.2,
+          mainLightColor: 0x6677aa,
+          mainLightIntensity: 0.6,
         },
       };
 
@@ -530,74 +623,99 @@
 
       // BUILD ALL ROOMS
       function buildAllRooms() {
-        Object.keys(ROOMS).forEach((roomId) => {
-          const grp = new THREE.Group();
-          grp.visible = false;
-
-          const ambient = new THREE.AmbientLight(0xffffff, 0.3);
-          grp.add(ambient);
-
-          const mainLight = new THREE.PointLight(0xffffcc, 1.2, 18);
-          mainLight.position.set(0, 3, 0);
-          grp.add(mainLight);
-
-          // Floor
-          const floor = new THREE.Mesh(
-            new THREE.PlaneGeometry(12, 12),
-            new THREE.MeshStandardMaterial({
-              color: getFloorColor(roomId),
-              roughness: 0.8,
-            })
-          );
-          floor.rotation.x = -Math.PI / 2;
-          grp.add(floor);
-
-          // Walls
-          const wallColor = getWallColor(roomId);
-          const wallMat = new THREE.MeshStandardMaterial({
-            color: wallColor,
-            roughness: 0.9,
-          });
-
-          const backWall = new THREE.Mesh(
-            new THREE.BoxGeometry(12, 3.5, 0.3),
-            wallMat.clone()
-          );
-          backWall.position.set(0, 1.75, -6);
-          grp.add(backWall);
-
-          const leftWall = new THREE.Mesh(
-            new THREE.BoxGeometry(0.3, 3.5, 12),
-            wallMat.clone()
-          );
-          leftWall.position.set(-6, 1.75, 0);
-          grp.add(leftWall);
-
-          const rightWall = new THREE.Mesh(
-            new THREE.BoxGeometry(0.3, 3.5, 12),
-            wallMat.clone()
-          );
-          rightWall.position.set(6, 1.75, 0);
-          grp.add(rightWall);
-
-          // Ceiling
-          const ceiling = new THREE.Mesh(
-            new THREE.PlaneGeometry(12, 12),
-            new THREE.MeshStandardMaterial({ color: getCeilingColor(roomId) })
-          );
-          ceiling.rotation.x = Math.PI / 2;
-          ceiling.position.y = 3.5;
-          grp.add(ceiling);
-
-          // Room-specific furniture
-          addRoomFurniture(grp, roomId);
-
-          roomObjects[roomId] = grp;
-          scene.add(grp);
-        });
+        Object.keys(ROOMS).forEach((roomId) => buildRoom(roomId));
       }
 
-      // HELPER: Get room colors
+      function buildRoom(roomId) {
+        const grp = new THREE.Group();
+        grp.visible = false;
+        grp.userData.roomId = roomId;
+
+        const roomConfig = ROOMS[roomId];
+
+        // Lighting
+        const ambient = new THREE.AmbientLight(
+          0xffffff,
+          roomConfig.ambientIntensity
+        );
+        grp.add(ambient);
+
+        const mainLight = new THREE.PointLight(
+          roomConfig.mainLightColor,
+          roomConfig.mainLightIntensity,
+          18
+        );
+        mainLight.position.set(0, 3, 0);
+        mainLight.userData.baseIntensity = roomConfig.mainLightIntensity;
+        mainLight.userData.baseColor = roomConfig.mainLightColor;
+        grp.add(mainLight);
+
+        if (!roomLights[roomId]) roomLights[roomId] = {};
+        roomLights[roomId].main = mainLight;
+        roomLights[roomId].ambient = ambient;
+
+        // Floor
+        const floorColor = getFloorColor(roomId);
+        const floor = new THREE.Mesh(
+          new THREE.PlaneGeometry(12, 12),
+          new THREE.MeshStandardMaterial({ color: floorColor, roughness: 0.8 })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        floor.userData.baseColor = floorColor;
+        grp.add(floor);
+
+        // Walls
+        const wallColor = getWallColor(roomId);
+        const wallMat = new THREE.MeshStandardMaterial({
+          color: wallColor,
+          roughness: 0.9,
+        });
+
+        const backWall = new THREE.Mesh(
+          new THREE.BoxGeometry(12, 3.5, 0.3),
+          wallMat.clone()
+        );
+        backWall.position.set(0, 1.75, -6);
+        backWall.userData.baseColor = wallColor;
+        grp.add(backWall);
+
+        const leftWall = new THREE.Mesh(
+          new THREE.BoxGeometry(0.3, 3.5, 12),
+          wallMat.clone()
+        );
+        leftWall.position.set(-6, 1.75, 0);
+        leftWall.userData.baseColor = wallColor;
+        grp.add(leftWall);
+
+        const rightWall = new THREE.Mesh(
+          new THREE.BoxGeometry(0.3, 3.5, 12),
+          wallMat.clone()
+        );
+        rightWall.position.set(6, 1.75, 0);
+        rightWall.userData.baseColor = wallColor;
+        grp.add(rightWall);
+
+        // Ceiling
+        const ceilingColor = getCeilingColor(roomId);
+        const ceiling = new THREE.Mesh(
+          new THREE.PlaneGeometry(12, 12),
+          new THREE.MeshStandardMaterial({ color: ceilingColor })
+        );
+        ceiling.rotation.x = Math.PI / 2;
+        ceiling.position.y = 3.5;
+        ceiling.userData.isCeiling = true;
+        ceiling.userData.baseColor = ceilingColor;
+        grp.add(ceiling);
+
+        // Room-specific furniture
+        addRoomFurniture(grp, roomId);
+
+        roomObjects[roomId] = grp;
+        scene.add(grp);
+      }
+
+      // ROOM COLORS
       function getFloorColor(roomId) {
         const colors = {
           hallway: 0x8a7a6a,
@@ -637,7 +755,7 @@
       // ADD ROOM-SPECIFIC FURNITURE
       function addRoomFurniture(grp, roomId) {
         if (roomId === "living") {
-          // Fireplace
+          // Fireplace with glow
           const fireplace = new THREE.Mesh(
             new THREE.BoxGeometry(2.5, 2, 0.6),
             new THREE.MeshStandardMaterial({ color: 0x3a2a2a })
@@ -647,16 +765,357 @@
 
           const fireplaceLight = new THREE.PointLight(0xff6600, 1.5, 8);
           fireplaceLight.position.set(0, 1, -5.5);
+          fireplaceLight.userData.baseIntensity = 1.5;
+          fireplaceLight.userData.baseColor = 0xff6600;
           grp.add(fireplaceLight);
+          roomLights.living.fireplace = fireplaceLight;
+
+          // Fire particles
+          const fireGeo = new THREE.BufferGeometry();
+          const firePos = new Float32Array(150);
+          for (let i = 0; i < 150; i += 3) {
+            firePos[i] = (Math.random() - 0.5) * 1.5;
+            firePos[i + 1] = Math.random() * 1.2;
+            firePos[i + 2] = 0;
+          }
+          fireGeo.setAttribute(
+            "position",
+            new THREE.BufferAttribute(firePos, 3)
+          );
+          const fire = new THREE.Points(
+            fireGeo,
+            new THREE.PointsMaterial({
+              color: 0xff6600,
+              size: 0.15,
+              transparent: true,
+              opacity: 0.8,
+              blending: THREE.AdditiveBlending,
+            })
+          );
+          fire.position.set(0, 0.2, -5.5);
+          fire.userData.isFireParticles = true;
+          grp.add(fire);
 
           // Couch
-          const couch = new THREE.Mesh(
-            new THREE.BoxGeometry(3.5, 0.7, 1.4),
-            new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+
+          const couchGroup = new THREE.Group();
+
+          // Use a nice fabric-like material
+          const fabricMat = new THREE.MeshStandardMaterial({
+            color: 0x504a40, // Warm charcoal
+            roughness: 1.0,
+          });
+
+          // A. The Base (The main foundation)
+          const couchBase = new THREE.Mesh(
+            new THREE.BoxGeometry(4.5, 0.4, 1.8),
+            fabricMat
           );
-          couch.position.set(-4, 0.35, -2.5);
-          grp.add(couch);
-        } else if (roomId === "bedroom") {
+          couchBase.position.y = 0.2;
+          couchGroup.add(couchBase);
+
+          // B. The Seating Cushions (Adding two separate boxes for detail)
+          const cushionGeom = new THREE.BoxGeometry(2.1, 0.3, 1.6);
+          const leftCushion = new THREE.Mesh(cushionGeom, fabricMat);
+          leftCushion.position.set(-1.1, 0.5, 0);
+          const rightCushion = new THREE.Mesh(cushionGeom, fabricMat);
+          rightCushion.position.set(1.1, 0.5, 0);
+          couchGroup.add(leftCushion, rightCushion);
+
+          // C. The Backrest
+          const backrest = new THREE.Mesh(
+            new THREE.BoxGeometry(4.5, 1.0, 0.4),
+            fabricMat
+          );
+          // We place this at +Z 0.7 so it's behind the cushions
+          backrest.position.set(0, 0.8, 0.7);
+          couchGroup.add(backrest);
+
+          // D. The Armrests (Left and Right)
+          const armGeom = new THREE.BoxGeometry(0.4, 0.6, 1.8);
+          const leftArm = new THREE.Mesh(armGeom, fabricMat);
+          leftArm.position.set(-2.05, 0.5, 0);
+          const rightArm = new THREE.Mesh(armGeom, fabricMat);
+          rightArm.position.set(2.05, 0.5, 0);
+          couchGroup.add(leftArm, rightArm);
+
+          // --- TRANSFORMATIONS ---
+          // 1. Rotation: Flip 180 degrees (Math.PI) to face the TV at the back wall
+
+          // 2. Position: X=0 (Center), Z=1.5 (Back of the room near camera)
+          couchGroup.position.set(0, 0, 0.5);
+
+          grp.add(couchGroup);
+
+          // Coffee table
+          const tableGroup = new THREE.Group();
+
+          // 1. Table Top (Thick Oak/Walnut look)
+          const tableTop = new THREE.Mesh(
+            new THREE.BoxGeometry(2.2, 0.15, 1.2),
+            new THREE.MeshStandardMaterial({ color: 0x4a3a2a, roughness: 0.8 })
+          );
+          tableTop.position.y = 0.5; // Height of the table
+          tableGroup.add(tableTop);
+
+          // 2. Table Legs (Four slender legs)
+          const legGeom = new THREE.BoxGeometry(0.1, 0.5, 0.1);
+          const legMat = new THREE.MeshStandardMaterial({ color: 0x2a1a0a });
+
+          const legPositions = [
+            { x: -0.9, z: -0.45 },
+            { x: 0.9, z: -0.45 },
+            { x: -0.9, z: 0.45 },
+            { x: 0.9, z: 0.45 },
+          ];
+
+          legPositions.forEach((pos) => {
+            const leg = new THREE.Mesh(legGeom, legMat);
+            leg.position.set(pos.x, 0.25, pos.z);
+            tableGroup.add(leg);
+          });
+
+          // 3. Center it on the rug
+          // X = 0 (Dead center)
+          // Z = -3 (Centered on the rug, between couch and TV)
+          tableGroup.position.set(0, 0, -3);
+          grp.add(tableGroup);
+
+          // TV
+          const tvGroup = new THREE.Group();
+
+          // 1. The Stand
+          const tvStand = new THREE.Mesh(
+            new THREE.BoxGeometry(2.5, 0.5, 0.6), // Slightly wider for style
+            new THREE.MeshStandardMaterial({ color: 0x1a1a1a }) // Sleek black
+          );
+          tvStand.position.y = 0.25;
+          tvGroup.add(tvStand);
+
+          // 2. The Screen
+          const tvScreen = new THREE.Mesh(
+            new THREE.BoxGeometry(2.2, 1.2, 0.05), // Modern widescreen ratio
+            new THREE.MeshStandardMaterial({
+              color: 0x000000,
+              emissive: 0x1a2a3a,
+              emissiveIntensity: 0.4,
+            })
+          );
+          tvScreen.position.set(0, 1.2, 0.2); // Positioned on top of the stand
+          tvScreen.userData.isTV = true;
+          tvGroup.add(tvScreen);
+
+          // 3. Position the whole group in the center of the back wall
+          // X = 0 (Center)
+          // Z = -5.5 (Against the back wall)
+          tvGroup.position.set(0, 0, -5.5);
+          grp.add(tvGroup);
+
+          // 2. The Screen
+          // --- ENHANCED TV SCREEN ASSEMBLY ---
+          const tvAssembly = new THREE.Group();
+
+          // 1. The Outer Bezel (The Frame)
+          const bezelGeom = new THREE.BoxGeometry(2.3, 1.3, 0.05);
+          const bezelMat = new THREE.MeshStandardMaterial({
+            color: 0x111111,
+            roughness: 0.2,
+            metalness: 0.8,
+          });
+          const bezel = new THREE.Mesh(bezelGeom, bezelMat);
+          tvAssembly.add(bezel);
+
+          // 2. The Actual Display Panel (The Glass)
+          // We make it slightly smaller than the bezel to create a "frame" look
+          const screenGeom = new THREE.BoxGeometry(2.2, 1.2, 0.01);
+          const screenMat = new THREE.MeshStandardMaterial({
+            color: 0x000000,
+            emissive: 0x334455, // Stronger blue-ish glow
+            emissiveIntensity: 0.8,
+            roughness: 0.1, // Shiny glass effect
+            metalness: 0.5,
+          });
+          const displayPanel = new THREE.Mesh(screenGeom, screenMat);
+          displayPanel.position.z = 0.03; // Sit slightly in front of the bezel
+          displayPanel.userData.isTV = true;
+          tvAssembly.add(displayPanel);
+
+          // 3. Add a Screen Glow (PointLight)
+          // This makes the TV actually cast light onto the floor/rug
+          const screenLight = new THREE.PointLight(0x44aaff, 1.2, 5);
+          screenLight.position.set(0, 0, 0.5);
+          tvAssembly.add(screenLight);
+
+          // Position the entire TV assembly
+          tvAssembly.position.set(0, 1.25, -5.5);
+          grp.add(tvAssembly);
+          // Rug
+          const rugWidth = 7;
+          const rugDepth = 5;
+
+          const rug = new THREE.Mesh(
+            new THREE.PlaneGeometry(rugWidth, rugDepth),
+            new THREE.MeshStandardMaterial({
+              color: 0x2c3e50,
+              roughness: 1.0,
+            })
+          );
+
+          rug.rotation.x = -Math.PI / 2; // Lay flat on floor
+
+          // Centering logic:
+          // X = 0 (Middle of width)
+          // Z = -3 (Middle of a 6-unit deep room)
+          rug.position.set(0, 0.01, -3);
+          grp.add(rug);
+
+          // --- ADDING PLANTS TO CORNERS ---
+          function createPlant(x, z) {
+            const plantGroup = new THREE.Group();
+
+            // 1. The Pot
+            const pot = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.3, 0.2, 0.5, 12),
+              new THREE.MeshStandardMaterial({ color: 0x8b4513 }) // Terracotta color
+            );
+            pot.position.y = 0.25;
+            plantGroup.add(pot);
+
+            // 2. The Stem
+            const stem = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.05, 0.05, 1.2, 8),
+              new THREE.MeshStandardMaterial({ color: 0x2d5a27 })
+            );
+            stem.position.y = 0.8;
+            plantGroup.add(stem);
+
+            // 3. The Leaves (Using simplified spheres/cones for a low-poly look)
+            const leafMat = new THREE.MeshStandardMaterial({ color: 0x3a6b35 });
+            for (let i = 0; i < 5; i++) {
+              const leaf = new THREE.Mesh(
+                new THREE.SphereGeometry(0.3, 8, 8),
+                leafMat
+              );
+              // Scale leaves to be flat-ish
+              leaf.scale.set(1, 0.4, 1);
+              // Distribute leaves up the stem
+              leaf.position.set(
+                Math.sin(i) * 0.2,
+                0.8 + i * 0.2,
+                Math.cos(i) * 0.2
+              );
+              plantGroup.add(leaf);
+            }
+
+            plantGroup.position.set(x, 0, z);
+            return plantGroup;
+          }
+
+          // Place the plants in the back corners
+          const leftPlant = createPlant(-4, -5.5);
+          const rightPlant = createPlant(4, -5.5);
+          grp.add(leftPlant, rightPlant);
+
+          // --- WALL ART ---
+          const frameGeom = new THREE.BoxGeometry(2, 1.2, 0.05);
+          const frameMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+          const painting = new THREE.Mesh(frameGeom, frameMat);
+
+          // --- FLOATING SHELVES (RIGHT WALL) ---
+          function addShelf(x, y, z) {
+            const shelfGroup = new THREE.Group();
+
+            // 1. The Wood Plank
+            const plank = new THREE.Mesh(
+              new THREE.BoxGeometry(1.5, 0.05, 0.6),
+              new THREE.MeshStandardMaterial({ color: 0x4a3a2a })
+            );
+            shelfGroup.add(plank);
+
+            // 2. The Books (Randomized heights for realism)
+            const colors = [0xd35400, 0x27ae60, 0x2980b9, 0xf1c40f];
+            for (let i = 0; i < 4; i++) {
+              const bookHeight = 0.3 + Math.random() * 0.2; // Varies the height
+              const book = new THREE.Mesh(
+                new THREE.BoxGeometry(0.12, bookHeight, 0.4),
+                new THREE.MeshStandardMaterial({
+                  color: colors[i % colors.length],
+                })
+              );
+              // Spacing them out along the shelf
+              book.position.set(-0.5 + i * 0.3, bookHeight / 2 + 0.02, 0);
+              shelfGroup.add(book);
+            }
+
+            // 3. Position and Rotation
+            shelfGroup.position.set(x, y, z);
+            // Rotate 90 degrees to sit flush against the right wall
+            shelfGroup.rotation.y = -Math.PI / 2;
+
+            grp.add(shelfGroup);
+          }
+
+          // Placed on the Right Wall (X is positive ~4.8)
+          addShelf(5.3, 2.1, -3.4);
+          addShelf(5.3, 1.6, -2.2);
+
+          // Position it on the left wall
+          painting.position.set(-4.9, 2.0, -3);
+          painting.rotation.y = Math.PI / 2; // Rotate to face the room
+          grp.add(painting);
+
+          // Add a "canvas" slightly in front of the frame
+          const canvas = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.8, 1.0),
+            new THREE.MeshStandardMaterial({ color: 0x95a5a6 }) // A neutral grey/blue canvas
+          );
+          canvas.position.set(-4.87, 2.0, -3);
+          canvas.rotation.y = Math.PI / 2;
+          grp.add(canvas);
+
+          // --- READING FLOOR LAMP ---
+          const lampGroup = new THREE.Group();
+
+          // 1. The Base
+          const lampBase = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 0.05, 16),
+            new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8 })
+          );
+          lampGroup.add(lampBase);
+
+          // 2. The Stand (Tall Pole)
+          const lampStand = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.03, 0.03, 3.5, 8),
+            new THREE.MeshStandardMaterial({ color: 0x111111 })
+          );
+          lampStand.position.y = 1.75;
+          lampGroup.add(lampStand);
+
+          // 3. The Lamp Shade
+          const shade = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.5, 0.6, 16, 1, true),
+            new THREE.MeshStandardMaterial({
+              color: 0xfff3e0,
+              side: THREE.DoubleSide,
+              emissive: 0xfff3e0,
+              emissiveIntensity: 0.2,
+            })
+          );
+          shade.position.y = 2.5;
+          lampGroup.add(shade);
+
+          // 4. The Actual Light (PointLight)
+          // Color: Warm Yellow, Intensity: 1.5, Distance: 7 units
+          const lampLight = new THREE.PointLight(0xffaa00, 1.5, 7);
+          lampLight.position.set(0, 3.3, 0);
+          lampGroup.add(lampLight);
+
+          // Position the whole lamp next to the shelves on the right
+          lampGroup.position.set(4, 0, -3.2);
+          grp.add(lampGroup);
+        }
+
+        if (roomId === "bedroom") {
           // Bed
           const bed = new THREE.Mesh(
             new THREE.BoxGeometry(2.5, 0.5, 3.5),
@@ -664,7 +1123,51 @@
           );
           bed.position.set(-3, 0.25, -3);
           grp.add(bed);
-        } else if (roomId === "study") {
+
+          const pillow = new THREE.Mesh(
+            new THREE.BoxGeometry(0.8, 0.2, 0.5),
+            new THREE.MeshStandardMaterial({ color: 0x8a7a9a })
+          );
+          pillow.position.set(-3, 0.6, -4.2);
+          grp.add(pillow);
+
+          // Nightstand
+          const nightstand = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 0.6, 0.4),
+            new THREE.MeshStandardMaterial({ color: 0x5a4a3a })
+          );
+          nightstand.position.set(-4.8, 0.3, -3);
+          grp.add(nightstand);
+
+          // Lamp
+          const lamp = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.15, 0.1, 0.4),
+            new THREE.MeshStandardMaterial({
+              color: 0xffffcc,
+              emissive: 0xffffaa,
+              emissiveIntensity: 0.3,
+            })
+          );
+          lamp.position.set(-4.8, 0.8, -3);
+          grp.add(lamp);
+
+          const lampLight = new THREE.PointLight(0xffddaa, 0.5, 4);
+          lampLight.position.set(-4.8, 1, -3);
+          grp.add(lampLight);
+          roomLights.bedroom.lamp = lampLight;
+
+          // Photo frames on wall
+          for (let i = 0; i < 3; i++) {
+            const frame = new THREE.Mesh(
+              new THREE.BoxGeometry(0.6, 0.8, 0.02),
+              new THREE.MeshStandardMaterial({ color: 0x4a3a2a })
+            );
+            frame.position.set(-5.85, 2 + i * 0.3, -2 - i * 0.8);
+            grp.add(frame);
+          }
+        }
+
+        if (roomId === "study") {
           // Desk
           const desk = new THREE.Mesh(
             new THREE.BoxGeometry(2, 0.1, 1),
@@ -673,41 +1176,898 @@
           desk.position.set(0, 0.8, -4);
           grp.add(desk);
 
-          // Bookshelf
-          const bookshelf = new THREE.Mesh(
-            new THREE.BoxGeometry(1.5, 2.5, 0.4),
-            new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
+          // Desk legs
+          for (let x of [-0.9, 0.9]) {
+            for (let z of [-0.4, 0.4]) {
+              const leg = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.04, 0.04, 0.8),
+                new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
+              );
+              leg.position.set(x, 0.4, -4 + z);
+              grp.add(leg);
+            }
+          }
+
+          // Chair
+          const chair = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 0.1, 0.6),
+            new THREE.MeshStandardMaterial({ color: 0x5a4a3a })
           );
-          bookshelf.position.set(5, 1.25, -3);
-          grp.add(bookshelf);
-        } else if (roomId === "garden") {
-          // Plants
-          for (let i = 0; i < 5; i++) {
-            const plant = new THREE.Mesh(
-              new THREE.ConeGeometry(0.2, 0.6, 8),
+          chair.position.set(0, 0.5, -2.5);
+          grp.add(chair);
+
+          // Books
+          for (let i = 0; i < 15; i++) {
+            const book = new THREE.Mesh(
+              new THREE.BoxGeometry(0.08, 0.3, 0.2),
+              new THREE.MeshStandardMaterial({
+                color: [0x8b4513, 0x654321, 0x4a3a2a][
+                  Math.floor(Math.random() * 3)
+                ],
+              })
+            );
+            const shelf = Math.floor(i / 5);
+            const pos = i % 5;
+            book.position.set(4.9 + (pos - 2) * 0.25, 0.5 + shelf * 0.7, -3);
+            book.userData.isBook = true;
+            grp.add(book);
+          }
+
+          // Desk lamp
+          const deskLamp = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.15, 0.3),
+            new THREE.MeshStandardMaterial({
+              color: 0xffffcc,
+              emissive: 0xffffaa,
+              emissiveIntensity: 0.4,
+            })
+          );
+          deskLamp.position.set(0.7, 1.1, -4);
+          grp.add(deskLamp);
+
+          const deskLight = new THREE.PointLight(0xffffcc, 0.8, 5);
+          deskLight.position.set(0.7, 1.3, -4);
+          grp.add(deskLight);
+          roomLights.study.desk = deskLight;
+
+          // --- COMPUTER MONITOR ---
+          const monitorGroup = new THREE.Group();
+
+          // Stand
+          const monStand = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.05, 0.05, 0.4),
+            new THREE.MeshStandardMaterial({ color: 0x333333 })
+          );
+          monStand.position.y = 0.2;
+          monitorGroup.add(monStand);
+
+          // Screen Bezel
+          const bezel = new THREE.Mesh(
+            new THREE.BoxGeometry(1.2, 0.7, 0.05),
+            new THREE.MeshStandardMaterial({ color: 0x111111 })
+          );
+          bezel.position.y = 0.6;
+          monitorGroup.add(bezel);
+
+          // Screen Glow (The "Display")
+          const screen = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.1, 0.6),
+            new THREE.MeshStandardMaterial({
+              color: 0x00aaff,
+              emissive: 0x00aaff,
+              emissiveIntensity: 0.5,
+            })
+          );
+          screen.position.set(0, 0.6, 0.03);
+          monitorGroup.add(screen);
+
+          monitorGroup.position.set(0, 0.8, -4.2); // On the desk
+          grp.add(monitorGroup);
+
+          // --- CHAIR BACKREST ---
+          const backrest = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 0.8, 0.1),
+            new THREE.MeshStandardMaterial({ color: 0x5a4a3a })
+          );
+          // Position it at the back of your existing chair seat
+          backrest.position.set(0, 0.9, -2.2);
+          grp.add(backrest);
+
+          // --- STUDY WALL SHELVES ---
+          function addStudyShelf(y, z) {
+            const shelf = new THREE.Mesh(
+              new THREE.BoxGeometry(2, 0.05, 0.5),
+              new THREE.MeshStandardMaterial({ color: 0x4a3a2a })
+            );
+            shelf.position.set(-4.8, y, z);
+            shelf.rotation.y = Math.PI / 2;
+            grp.add(shelf);
+          }
+
+          addStudyShelf(2.5, -4);
+          addStudyShelf(1.8, -3.2);
+
+          // --- 1. KEYBOARD & MOUSE ---
+          const keyboard = new THREE.Mesh(
+            new THREE.BoxGeometry(0.7, 0.02, 0.25),
+            new THREE.MeshStandardMaterial({ color: 0x222222 })
+          );
+          keyboard.position.set(0, 0.86, -3.8);
+          grp.add(keyboard);
+
+          const mouse = new THREE.Mesh(
+            new THREE.BoxGeometry(0.08, 0.03, 0.12),
+            new THREE.MeshStandardMaterial({ color: 0x222222 })
+          );
+          mouse.position.set(0.5, 0.86, -3.8);
+          grp.add(mouse);
+
+          // --- 2. FILING CABINET (Fills the corner) ---
+          const cabinet = new THREE.Group();
+          const body = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1.5, 1),
+            new THREE.MeshStandardMaterial({ color: 0x7f8c8d }) // Metal grey
+          );
+          cabinet.add(body);
+
+          // Drawer Lines
+          for (let i = 0; i < 3; i++) {
+            const drawer = new THREE.Mesh(
+              new THREE.BoxGeometry(0.9, 0.4, 0.05),
+              new THREE.MeshStandardMaterial({ color: 0x95a5a6 })
+            );
+            drawer.position.set(0, 0.4 - i * 0.45, 0.5);
+            cabinet.add(drawer);
+          }
+          cabinet.position.set(-4, 0.75, -5); // Back left corner
+          grp.add(cabinet);
+
+          // --- 4. RUG (Adds warmth to the floor) ---
+          const studyRug = new THREE.Mesh(
+            new THREE.PlaneGeometry(5, 4),
+            new THREE.MeshStandardMaterial({ color: 0x7e634e })
+          );
+          studyRug.rotation.x = -Math.PI / 2;
+          studyRug.position.set(0, 0.01, -3);
+          grp.add(studyRug);
+
+          // --- 5. OVERHEAD HANGING LAMP ---
+          const cord = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.01, 0.01, 2),
+            new THREE.MeshStandardMaterial({ color: 0x111111 })
+          );
+          cord.position.set(-1.5, 4, -3);
+          const shade = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.1, 0.4, 0.4, 16, 1, true),
+            new THREE.MeshStandardMaterial({
+              color: 0x444444,
+              side: THREE.DoubleSide,
+            })
+          );
+          shade.position.set(-1.5, 3, -3);
+
+          const overheadLight = new THREE.PointLight(0xffffff, 0.5, 8);
+          overheadLight.position.set(-1.5, 2.8, -3);
+
+          grp.add(cord, shade, overheadLight);
+
+          // --- 1. COFFEE MUG ---
+          const mugGroup = new THREE.Group();
+
+          // The Mug Body
+          const mugBody = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.06, 0.06, 0.15, 12),
+            new THREE.MeshStandardMaterial({ color: 0x2980b9 }) // Blue mug
+          );
+          mugGroup.add(mugBody);
+
+          // The Handle (A Torus/Donut shape)
+          const handle = new THREE.Mesh(
+            new THREE.TorusGeometry(0.04, 0.01, 8, 12),
+            new THREE.MeshStandardMaterial({ color: 0x2980b9 })
+          );
+          handle.position.set(0.06, 0, 0);
+          mugGroup.add(handle);
+
+          mugGroup.position.set(-0.5, 0.88, -3.8); // On the desk
+          grp.add(mugGroup);
+
+          // --- 2. TRASH CAN ---
+          const trashCan = new THREE.Group();
+
+          // The Main Bin (Open at the top)
+          const bin = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.25, 0.2, 0.5, 12, 1, true),
+            new THREE.MeshStandardMaterial({
+              color: 0x333333,
+              side: THREE.DoubleSide,
+              wireframe: false, // Set to true if you want a mesh-style bin!
+            })
+          );
+          trashCan.add(bin);
+
+          // Some "Trash" inside (crumpled paper)
+          const paper = new THREE.Mesh(
+            new THREE.DodecahedronGeometry(0.1),
+            new THREE.MeshStandardMaterial({ color: 0xeeeeee })
+          );
+          paper.position.y = -0.1;
+          trashCan.add(paper);
+
+          trashCan.position.set(1.2, 0.25, -3.5); // On the floor next to desk
+          grp.add(trashCan);
+        }
+
+        if (roomId === "garden") {
+          // CENTRAL TREE - The heart of the garden
+          const trunkGeo = new THREE.CylinderGeometry(0.3, 0.4, 2.5);
+          const trunk = new THREE.Mesh(
+            trunkGeo,
+            new THREE.MeshStandardMaterial({ color: 0x4a3a2a, roughness: 0.9 })
+          );
+          trunk.position.set(0, 1.25, -4);
+          trunk.userData.isTree = true;
+          trunk.userData.baseHeight = 2.5;
+          grp.add(trunk);
+
+          // Tree canopy
+          const canopy = new THREE.Mesh(
+            new THREE.SphereGeometry(1.2, 8, 8),
+            new THREE.MeshStandardMaterial({
+              color: 0x2d5016,
+              emissive: 0x1a3010,
+              emissiveIntensity: 0.2,
+            })
+          );
+          canopy.position.set(0, 2.8, -4);
+          canopy.userData.isCanopy = true;
+          canopy.userData.baseScale = 1.2;
+          grp.add(canopy);
+
+          // Glowing roots visible through ground
+          for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            const root = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.08, 0.04, 0.8),
+              new THREE.MeshStandardMaterial({
+                color: 0x3d5016,
+                emissive: 0x4d7020,
+                emissiveIntensity: 0.3,
+                transparent: true,
+                opacity: 0.6,
+              })
+            );
+            root.position.set(
+              Math.cos(angle) * 0.5,
+              0.1,
+              -4 + Math.sin(angle) * 0.5
+            );
+            root.rotation.z = angle;
+            root.rotation.x = Math.PI / 3;
+            root.userData.isRoot = true;
+            grp.add(root);
+          }
+
+          // DYNAMIC FLOWERS - bloom and wilt
+          for (let i = 0; i < 20; i++) {
+            const flowerGroup = new THREE.Group();
+
+            // Stem
+            const stem = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.02, 0.02, 0.3),
               new THREE.MeshStandardMaterial({ color: 0x2d5016 })
             );
-            plant.position.set(
+            stem.position.y = 0.15;
+            flowerGroup.add(stem);
+
+            // Flower head
+            const flowerColors = [
+              0xff6b9d, 0xffee66, 0xaa88ff, 0xff88aa, 0x88ffaa,
+            ];
+            const flowerColor =
+              flowerColors[Math.floor(Math.random() * flowerColors.length)];
+
+            const flower = new THREE.Mesh(
+              new THREE.SphereGeometry(0.1, 8, 8),
+              new THREE.MeshStandardMaterial({
+                color: flowerColor,
+                emissive: flowerColor,
+                emissiveIntensity: 0.4,
+              })
+            );
+            flower.position.y = 0.3;
+            flower.userData.baseScale = 1.0;
+            flowerGroup.add(flower);
+
+            flowerGroup.position.set(
+              (Math.random() - 0.5) * 9,
+              0,
+              (Math.random() - 0.5) * 9
+            );
+
+            flowerGroup.userData.isFlowerGroup = true;
+            flowerGroup.userData.bloomState = Math.random();
+            flowerGroup.userData.flower = flower;
+            flowerGroup.userData.rotationSpeed = 0.2 + Math.random() * 0.3;
+
+            grp.add(flowerGroup);
+          }
+
+          // GLOWING MUSHROOMS - pulse with heartbeat
+          for (let i = 0; i < 12; i++) {
+            const mushroomCap = new THREE.Mesh(
+              new THREE.SphereGeometry(0.15, 8, 8),
+              new THREE.MeshStandardMaterial({
+                color: 0x8844ff,
+                emissive: 0x8844ff,
+                emissiveIntensity: 0.5,
+              })
+            );
+            mushroomCap.scale.y = 0.5;
+
+            const mushroomStem = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.05, 0.05, 0.15),
+              new THREE.MeshStandardMaterial({ color: 0xcccccc })
+            );
+            mushroomStem.position.y = -0.075;
+
+            const mushroom = new THREE.Group();
+            mushroom.add(mushroomCap);
+            mushroom.add(mushroomStem);
+
+            mushroom.position.set(
+              (Math.random() - 0.5) * 8,
+              0.15,
+              (Math.random() - 0.5) * 8
+            );
+
+            mushroom.userData.isMushroom = true;
+            mushroom.userData.pulseOffset = Math.random() * Math.PI * 2;
+            mushroom.userData.cap = mushroomCap;
+
+            grp.add(mushroom);
+          }
+
+          // BUTTERFLIES - spawn when happy
+          for (let i = 0; i < 8; i++) {
+            const butterflyBody = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.02, 0.02, 0.1),
+              new THREE.MeshStandardMaterial({ color: 0x333333 })
+            );
+
+            const wingGeo = new THREE.CircleGeometry(0.08, 6);
+            const wingMat = new THREE.MeshStandardMaterial({
+              color: [0xff6b9d, 0xffaa44, 0x88aaff][i % 3],
+              side: THREE.DoubleSide,
+              transparent: true,
+              opacity: 0,
+            });
+
+            const leftWing = new THREE.Mesh(wingGeo, wingMat);
+            leftWing.position.set(-0.06, 0, 0);
+            leftWing.rotation.y = Math.PI / 4;
+
+            const rightWing = new THREE.Mesh(wingGeo, wingMat.clone());
+            rightWing.position.set(0.06, 0, 0);
+            rightWing.rotation.y = -Math.PI / 4;
+
+            const butterfly = new THREE.Group();
+            butterfly.add(butterflyBody);
+            butterfly.add(leftWing);
+            butterfly.add(rightWing);
+
+            butterfly.position.set(
+              (Math.random() - 0.5) * 6,
+              0.5 + Math.random() * 2,
+              (Math.random() - 0.5) * 6
+            );
+
+            butterfly.userData.isButterfly = true;
+            butterfly.userData.leftWing = leftWing;
+            butterfly.userData.rightWing = rightWing;
+            butterfly.userData.flightPath = {
+              x: Math.random() * Math.PI * 2,
+              y: Math.random() * Math.PI * 2,
+              z: Math.random() * Math.PI * 2,
+            };
+            butterfly.userData.speed = 0.5 + Math.random() * 0.5;
+
+            grp.add(butterfly);
+          }
+
+          // FIREFLIES - glow and swarm
+          for (let i = 0; i < 15; i++) {
+            const firefly = new THREE.Mesh(
+              new THREE.SphereGeometry(0.04, 4, 4),
+              new THREE.MeshStandardMaterial({
+                color: 0xffff88,
+                emissive: 0xffff88,
+                emissiveIntensity: 1.0,
+                transparent: true,
+                opacity: 0,
+              })
+            );
+
+            firefly.position.set(
+              (Math.random() - 0.5) * 8,
+              0.5 + Math.random() * 2.5,
+              (Math.random() - 0.5) * 8
+            );
+
+            firefly.userData.isFirefly = true;
+            firefly.userData.glowOffset = Math.random() * Math.PI * 2;
+            firefly.userData.flightPath = {
+              x: Math.random() * Math.PI * 2,
+              y: Math.random() * Math.PI * 2,
+              z: Math.random() * Math.PI * 2,
+            };
+
+            grp.add(firefly);
+          }
+
+          // POND - water that changes color
+          const pond = new THREE.Mesh(
+            new THREE.CircleGeometry(1.5, 32),
+            new THREE.MeshStandardMaterial({
+              color: 0x4488cc,
+              transparent: true,
+              opacity: 0.6,
+              emissive: 0x2266aa,
+              emissiveIntensity: 0.3,
+            })
+          );
+          pond.rotation.x = -Math.PI / 2;
+          pond.position.set(3, 0.02, -2);
+          pond.userData.isPond = true;
+          pond.userData.baseColor = 0x4488cc;
+          grp.add(pond);
+
+          // Pond edge
+          const pondEdge = new THREE.Mesh(
+            new THREE.TorusGeometry(1.5, 0.1, 8, 24),
+            new THREE.MeshStandardMaterial({ color: 0x8a8a8a })
+          );
+          pondEdge.rotation.x = Math.PI / 2;
+          pondEdge.position.set(3, 0.05, -2);
+          grp.add(pondEdge);
+
+          // VINES on walls - grow with hope
+          for (let i = 0; i < 8; i++) {
+            const vinePoints = [];
+            const segments = 10;
+            for (let j = 0; j < segments; j++) {
+              vinePoints.push(
+                new THREE.Vector3(Math.sin(j * 0.3) * 0.2, j * 0.3, 0)
+              );
+            }
+
+            const vineCurve = new THREE.CatmullRomCurve3(vinePoints);
+            const vineGeo = new THREE.TubeGeometry(
+              vineCurve,
+              20,
+              0.02,
+              4,
+              false
+            );
+            const vine = new THREE.Mesh(
+              vineGeo,
+              new THREE.MeshStandardMaterial({
+                color: 0x2d5016,
+                transparent: true,
+                opacity: 0,
+              })
+            );
+
+            const wallSide = i < 4 ? -5.9 : 5.9;
+            const alongWall = ((i % 4) - 1.5) * 2;
+
+            vine.position.set(
+              i < 4 ? alongWall : wallSide,
+              0,
+              i < 4 ? wallSide : alongWall
+            );
+            vine.rotation.y = i < 4 ? 0 : Math.PI / 2;
+
+            vine.userData.isVine = true;
+            vine.userData.growthProgress = 0;
+
+            grp.add(vine);
+          }
+
+          // STONE PATH - lights up
+          for (let i = 0; i < 8; i++) {
+            const stone = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.35, 0.35, 0.08),
+              new THREE.MeshStandardMaterial({
+                color: 0x888888,
+                emissive: 0x666666,
+                emissiveIntensity: 0,
+              })
+            );
+            stone.position.set(0, 0.04, 5 - i * 1.3);
+            stone.rotation.y = Math.random() * Math.PI;
+            stone.userData.isPathStone = true;
+            stone.userData.index = i;
+            grp.add(stone);
+          }
+
+          // SUN RAYS for hope (will appear from ceiling)
+          for (let i = 0; i < 5; i++) {
+            const rayGeo = new THREE.CylinderGeometry(0.1, 0.5, 3, 8);
+            const ray = new THREE.Mesh(
+              rayGeo,
+              new THREE.MeshBasicMaterial({
+                color: 0xffffaa,
+                transparent: true,
+                opacity: 0,
+              })
+            );
+            ray.position.set(
+              (Math.random() - 0.5) * 6,
+              2,
+              (Math.random() - 0.5) * 6
+            );
+            ray.userData.isSunRay = true;
+            grp.add(ray);
+          }
+
+          // Additional ambient light for garden
+          const gardenLight = new THREE.PointLight(0xddffcc, 0.5, 15);
+          gardenLight.position.set(0, 2, -4);
+          grp.add(gardenLight);
+          roomLights.garden.tree = gardenLight;
+        }
+
+        if (roomId === "attic") {
+          // SHAKING BOXES - get violent with fear
+          for (let i = 0; i < 8; i++) {
+            const boxSize = 0.4 + Math.random() * 0.4;
+            const box = new THREE.Mesh(
+              new THREE.BoxGeometry(boxSize, boxSize, boxSize),
+              new THREE.MeshStandardMaterial({
+                color: 0x4a3a2a,
+                roughness: 0.9,
+              })
+            );
+            box.position.set(
+              (Math.random() - 0.5) * 9,
+              boxSize / 2,
+              (Math.random() - 0.5) * 9
+            );
+            box.rotation.y = Math.random() * Math.PI;
+            box.userData.isBox = true;
+            box.userData.originalPos = box.position.clone();
+            box.userData.originalRot = box.rotation.clone();
+            box.userData.shakeIntensity = 0;
+            grp.add(box);
+          }
+
+          // ROCKING CHAIR - rocks faster with fear
+          const chairSeat = new THREE.Mesh(
+            new THREE.BoxGeometry(0.8, 0.1, 0.8),
+            new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
+          );
+          chairSeat.position.set(-3, 0.5, -3);
+
+          const chairBack = new THREE.Mesh(
+            new THREE.BoxGeometry(0.8, 1.2, 0.1),
+            new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
+          );
+          chairBack.position.set(0, 0.6, -0.35);
+
+          const rockerLeft = new THREE.Mesh(
+            new THREE.TorusGeometry(0.5, 0.05, 8, 16, Math.PI),
+            new THREE.MeshStandardMaterial({ color: 0x2a1a1a })
+          );
+          rockerLeft.rotation.z = Math.PI;
+          rockerLeft.position.set(-0.3, -0.45, 0);
+
+          const rockerRight = rockerLeft.clone();
+          rockerRight.position.set(0.3, -0.45, 0);
+
+          const rockingChair = new THREE.Group();
+          rockingChair.add(chairSeat);
+          rockingChair.add(chairBack);
+          rockingChair.add(rockerLeft);
+          rockingChair.add(rockerRight);
+          rockingChair.position.set(-3, 0.5, -3);
+          rockingChair.userData.isRockingChair = true;
+          rockingChair.userData.rockSpeed = 0;
+          grp.add(rockingChair);
+
+          // HANGING BULB - swings and flickers
+          const bulbChain = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.01, 0.01, 1.5),
+            new THREE.MeshStandardMaterial({ color: 0x222222 })
+          );
+          bulbChain.position.set(0, 3, -2);
+
+          const bulb = new THREE.Mesh(
+            new THREE.SphereGeometry(0.15, 8, 8),
+            new THREE.MeshStandardMaterial({
+              color: 0xffaa44,
+              emissive: 0xffaa44,
+              emissiveIntensity: 0.8,
+            })
+          );
+          bulb.position.y = -0.75;
+
+          const hangingBulb = new THREE.Group();
+          hangingBulb.add(bulbChain);
+          hangingBulb.add(bulb);
+          hangingBulb.position.set(0, 3, -2);
+          hangingBulb.userData.isHangingBulb = true;
+          hangingBulb.userData.bulb = bulb;
+          hangingBulb.userData.swingIntensity = 0;
+          grp.add(hangingBulb);
+
+          // Bulb light
+          const bulbLight = new THREE.PointLight(0xffaa44, 0.6, 8);
+          bulbLight.position.set(0, 2.25, -2);
+          bulbLight.userData.isBulbLight = true;
+          bulbLight.userData.baseIntensity = 0.6;
+          grp.add(bulbLight);
+          roomLights.attic.bulb = bulbLight;
+
+          // MANNEQUIN - turns to face you
+          const mannequinBody = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.15, 1.2),
+            new THREE.MeshStandardMaterial({ color: 0xcccccc })
+          );
+          mannequinBody.position.set(4, 0.6, -4);
+
+          const mannequinHead = new THREE.Mesh(
+            new THREE.SphereGeometry(0.2, 8, 8),
+            new THREE.MeshStandardMaterial({ color: 0xcccccc })
+          );
+          mannequinHead.position.y = 0.8;
+
+          const mannequin = new THREE.Group();
+          mannequin.add(mannequinBody);
+          mannequin.add(mannequinHead);
+          mannequin.position.set(4, 0, -4);
+          mannequin.userData.isMannequin = true;
+          mannequin.userData.targetRotation = 0;
+          grp.add(mannequin);
+
+          // GLOWING EYES in corners
+          for (let i = 0; i < 12; i++) {
+            const eyePair = new THREE.Group();
+
+            const leftEye = new THREE.Mesh(
+              new THREE.SphereGeometry(0.05, 8, 8),
+              new THREE.MeshBasicMaterial({
+                color: 0xff4444,
+                transparent: true,
+                opacity: 0,
+              })
+            );
+            leftEye.position.set(-0.08, 0, 0);
+
+            const rightEye = new THREE.Mesh(
+              new THREE.SphereGeometry(0.05, 8, 8),
+              new THREE.MeshBasicMaterial({
+                color: 0xff4444,
+                transparent: true,
+                opacity: 0,
+              })
+            );
+            rightEye.position.set(0.08, 0, 0);
+
+            eyePair.add(leftEye);
+            eyePair.add(rightEye);
+
+            // Place in corners and shadows
+            const corner = Math.floor(i / 3);
+            const height = 0.5 + (i % 3) * 0.8;
+
+            if (corner === 0) eyePair.position.set(-5.5, height, -5.5);
+            else if (corner === 1) eyePair.position.set(5.5, height, -5.5);
+            else if (corner === 2) eyePair.position.set(-5.5, height, 5.5);
+            else eyePair.position.set(5.5, height, 5.5);
+
+            eyePair.lookAt(0, height, 0);
+            eyePair.userData.isEyes = true;
+            eyePair.userData.leftEye = leftEye;
+            eyePair.userData.rightEye = rightEye;
+            eyePair.userData.blinkOffset = Math.random() * Math.PI * 2;
+
+            grp.add(eyePair);
+          }
+
+          // SHADOW CREATURES on walls
+          for (let i = 0; i < 6; i++) {
+            const shadowGeo = new THREE.PlaneGeometry(0.6, 1.2);
+            const shadow = new THREE.Mesh(
+              shadowGeo,
+              new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide,
+              })
+            );
+
+            const wall = Math.floor(i / 2);
+            if (wall === 0) {
+              shadow.position.set(-5.95, 1.5, ((i % 2) - 0.5) * 4);
+              shadow.rotation.y = Math.PI / 2;
+            } else if (wall === 1) {
+              shadow.position.set(5.95, 1.5, ((i % 2) - 0.5) * 4);
+              shadow.rotation.y = -Math.PI / 2;
+            } else {
+              shadow.position.set(((i % 2) - 0.5) * 4, 1.5, -5.95);
+            }
+
+            shadow.userData.isShadow = true;
+            shadow.userData.crawlOffset = Math.random() * Math.PI * 2;
+            shadow.userData.basePos = shadow.position.clone();
+            grp.add(shadow);
+          }
+
+          // COBWEBS - grow and spread
+          for (let i = 0; i < 8; i++) {
+            const cobweb = new THREE.Mesh(
+              new THREE.PlaneGeometry(1.2, 1.2),
+              new THREE.MeshBasicMaterial({
+                color: 0xcccccc,
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide,
+              })
+            );
+
+            const corner = i % 4;
+            const height = i < 4 ? 3.2 : 2.0;
+
+            if (corner === 0) cobweb.position.set(-5.5, height, -5.5);
+            else if (corner === 1) cobweb.position.set(5.5, height, -5.5);
+            else if (corner === 2) cobweb.position.set(-5.5, height, 5.5);
+            else cobweb.position.set(5.5, height, 5.5);
+
+            cobweb.lookAt(0, height, 0);
+            cobweb.userData.isCobweb = true;
+            cobweb.userData.growthProgress = 0;
+            grp.add(cobweb);
+          }
+
+          // REACHING HANDS from behind boxes
+          for (let i = 0; i < 4; i++) {
+            const handGeo = new THREE.SphereGeometry(0.08, 6, 6);
+            handGeo.scale(1, 1.5, 0.8);
+
+            const hand = new THREE.Mesh(
+              handGeo,
+              new THREE.MeshStandardMaterial({
+                color: 0x3a3a3a,
+                transparent: true,
+                opacity: 0,
+              })
+            );
+
+            hand.position.set(
               (Math.random() - 0.5) * 8,
               0.3,
               (Math.random() - 0.5) * 8
             );
-            grp.add(plant);
+            hand.rotation.z = Math.PI / 4;
+            hand.userData.isHand = true;
+            hand.userData.reachOffset = Math.random() * Math.PI * 2;
+            hand.userData.basePos = hand.position.clone();
+            grp.add(hand);
           }
-        } else if (roomId === "attic") {
-          // Boxes
-          for (let i = 0; i < 4; i++) {
-            const box = new THREE.Mesh(
-              new THREE.BoxGeometry(0.6, 0.6, 0.6),
-              new THREE.MeshStandardMaterial({ color: 0x4a3a2a })
+
+          // FLOOR CRACKS - spread with fear
+          for (let i = 0; i < 6; i++) {
+            const crack = new THREE.Mesh(
+              new THREE.PlaneGeometry(0.1, 2 + Math.random()),
+              new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                transparent: true,
+                opacity: 0,
+              })
             );
-            box.position.set(
-              (Math.random() - 0.5) * 6,
-              0.3,
-              (Math.random() - 0.5) * 6
+            crack.rotation.x = -Math.PI / 2;
+            crack.position.set(
+              (Math.random() - 0.5) * 10,
+              0.01,
+              (Math.random() - 0.5) * 10
             );
-            grp.add(box);
+            crack.rotation.z = Math.random() * Math.PI;
+            crack.userData.isCrack = true;
+            crack.userData.spreadProgress = 0;
+            grp.add(crack);
           }
+
+          // DUST/FOG particles for eerie atmosphere
+          const dustCount = 200;
+          const dustGeo = new THREE.BufferGeometry();
+          const dustPos = new Float32Array(dustCount * 3);
+          for (let i = 0; i < dustCount * 3; i += 3) {
+            dustPos[i] = (Math.random() - 0.5) * 12;
+            dustPos[i + 1] = Math.random() * 3.5;
+            dustPos[i + 2] = (Math.random() - 0.5) * 12;
+          }
+          dustGeo.setAttribute(
+            "position",
+            new THREE.BufferAttribute(dustPos, 3)
+          );
+          const atticDust = new THREE.Points(
+            dustGeo,
+            new THREE.PointsMaterial({
+              color: 0x888888,
+              size: 0.08,
+              transparent: true,
+              opacity: 0,
+            })
+          );
+          atticDust.userData.isAtticDust = true;
+          grp.add(atticDust);
+
+          // SLAMMING DOOR
+          const door = new THREE.Mesh(
+            new THREE.BoxGeometry(1.5, 2.5, 0.1),
+            new THREE.MeshStandardMaterial({ color: 0x2a1a1a })
+          );
+          door.position.set(5.2, 1.25, 3);
+          door.userData.isDoor = true;
+          door.userData.slamTimer = 0;
+          door.userData.isOpen = false;
+          grp.add(door);
+        }
+
+        if (roomId === "hallway") {
+          // Doors
+          const doorMat = new THREE.MeshStandardMaterial({ color: 0x5a4a3a });
+          const doorPositions = [
+            { z: -8, label: "Living" },
+            { z: -3, label: "Bedroom" },
+            { z: 2, label: "Study" },
+            { z: 7, label: "Garden" },
+          ];
+
+          doorPositions.forEach((pos, idx) => {
+            const door = new THREE.Mesh(
+              new THREE.BoxGeometry(1.5, 2.5, 0.1),
+              doorMat.clone()
+            );
+            door.position.set(-4.85, 1.25, pos.z);
+            grp.add(door);
+
+            // Door frame
+            const frame = new THREE.Mesh(
+              new THREE.BoxGeometry(1.7, 2.7, 0.15),
+              new THREE.MeshStandardMaterial({ color: 0x3a2a1a })
+            );
+            frame.position.set(-4.87, 1.35, pos.z);
+            grp.add(frame);
+
+            // Door handle
+            const handle = new THREE.Mesh(
+              new THREE.SphereGeometry(0.08, 8, 8),
+              new THREE.MeshStandardMaterial({ color: 0x8a7a6a })
+            );
+            handle.position.set(-4.3, 1.25, pos.z + 0.5);
+            grp.add(handle);
+          });
+
+          // Attic ladder/access
+          const ladder = new THREE.Mesh(
+            new THREE.BoxGeometry(0.5, 2.5, 0.1),
+            new THREE.MeshStandardMaterial({ color: 0x4a3a2a })
+          );
+          ladder.position.set(4.5, 1.25, -5);
+          ladder.rotation.z = Math.PI / 8;
+          grp.add(ladder);
+
+          // Runner rug down hallway
+          const runner = new THREE.Mesh(
+            new THREE.PlaneGeometry(2, 18),
+            new THREE.MeshStandardMaterial({ color: 0x6a4a4a, roughness: 0.9 })
+          );
+          runner.rotation.x = -Math.PI / 2;
+          runner.position.set(0, 0.01, 0);
+          grp.add(runner);
         }
       }
 
@@ -717,9 +2077,15 @@
           roomObjects[id].visible = id === roomId;
         });
         currentRoom = roomId;
-        renderer.setClearColor(ROOMS[roomId].bg);
+
+        const roomConfig = ROOMS[roomId];
+        renderer.setClearColor(roomConfig.bg);
+
         document.getElementById("current-room-name").textContent =
-          ROOMS[roomId].name;
+          roomConfig.name;
+        document.getElementById("desc-title").textContent = roomConfig.name;
+        document.getElementById("desc-text").textContent =
+          roomConfig.description;
 
         document.querySelectorAll(".nav-button").forEach((btn) => {
           btn.classList.toggle("current-room", btn.dataset.room === roomId);
@@ -732,7 +2098,6 @@
         let emotions = {};
         let intensity = 1.0;
 
-        // Detect intensity
         for (let level in INTENSITY) {
           for (let keyword of INTENSITY[level]) {
             if (text.includes(keyword)) {
@@ -743,7 +2108,6 @@
           }
         }
 
-        // Detect emotions
         for (let emotion in EMOTIONS) {
           let score = 0;
           for (let kw of EMOTIONS[emotion].pri) {
@@ -755,7 +2119,6 @@
           if (score > 0) emotions[emotion] = score;
         }
 
-        // Normalize
         let total = Object.values(emotions).reduce((a, b) => a + b, 0);
         if (total > 0) {
           for (let key in emotions) emotions[key] /= total;
@@ -786,6 +2149,7 @@
           document.getElementById("entrance").classList.add("hidden");
           document.getElementById("interior-ui").style.opacity = "1";
           document.getElementById("room-navigation").style.opacity = "1";
+          document.getElementById("room-description").style.opacity = "1";
           moveCamera(ROOMS.hallway.camera, ROOMS.hallway.look, 2000);
         }, 1000);
       }
@@ -856,7 +2220,6 @@
           "intensity-display"
         ).innerText = `Intensity: ${intensityText}`;
 
-        // Reset overlays
         document
           .querySelectorAll(
             ".rain-overlay, .fog-overlay, .sunset-glow, .heat-wave, .love-glow, .dark-overlay"
@@ -865,7 +2228,6 @@
 
         Object.values(particles).forEach((p) => (p.material.opacity = 0));
 
-        // Apply emotion effects
         emotionState = {
           targetHeight: 3.5,
           currentHeight: emotionState.currentHeight,
@@ -967,27 +2329,982 @@
       function animate() {
         requestAnimationFrame(animate);
         const time = clock.getElapsedTime();
-        const delta = clock.getDelta();
 
         if (hasEntered && !isTransitioning) {
-          // Smooth ceiling height transition
           emotionState.currentHeight = THREE.MathUtils.lerp(
             emotionState.currentHeight,
             emotionState.targetHeight,
             0.02
           );
 
-          // Breathing effect on current room's ceiling
+          // Animate current room
           if (roomObjects[currentRoom]) {
             roomObjects[currentRoom].children.forEach((child) => {
-              if (
-                child.geometry &&
-                child.geometry.type === "PlaneGeometry" &&
-                child.rotation.x > 3
-              ) {
+              // Ceiling breathing
+              if (child.userData.isCeiling) {
                 child.position.y =
                   emotionState.currentHeight +
                   Math.sin(time * 0.5) * emotionState.breathing;
+              }
+
+              // Fire particles
+              if (
+                child.userData.isFireParticles &&
+                child.material.opacity > 0.05
+              ) {
+                const pos = child.geometry.attributes.position.array;
+                for (let i = 0; i < pos.length; i += 3) {
+                  pos[i + 1] += 0.02 + Math.random() * 0.01;
+                  pos[i] += (Math.random() - 0.5) * 0.01;
+                  if (pos[i + 1] > 1.5) {
+                    pos[i + 1] = 0.2;
+                    pos[i] = (Math.random() - 0.5) * 1.5;
+                  }
+                }
+                child.geometry.attributes.position.needsUpdate = true;
+              }
+
+              // === GARDEN ANIMATIONS ===
+              if (currentRoom === "garden") {
+                const hopeWeight = (emotionBlend.HOPE || 0) * currentIntensity;
+                const peaceWeight =
+                  (emotionBlend.PEACE || 0) * currentIntensity;
+                const loveWeight = (emotionBlend.LOVE || 0) * currentIntensity;
+                const sadnessWeight =
+                  (emotionBlend.SADNESS || 0) * currentIntensity;
+                const positiveEnergy = hopeWeight + peaceWeight + loveWeight;
+
+                // TREE GROWTH
+                if (child.userData.isTree) {
+                  const growthFactor = 1 + hopeWeight * 0.5;
+                  child.scale.y = THREE.MathUtils.lerp(
+                    child.scale.y,
+                    growthFactor,
+                    0.02
+                  );
+                  child.position.y = THREE.MathUtils.lerp(
+                    child.position.y,
+                    1.25 * growthFactor,
+                    0.02
+                  );
+                }
+
+                // CANOPY SIZE
+                if (child.userData.isCanopy) {
+                  const canopySize =
+                    child.userData.baseScale * (1 + positiveEnergy * 0.4);
+                  child.scale.setScalar(
+                    THREE.MathUtils.lerp(child.scale.x, canopySize, 0.02)
+                  );
+                  child.material.emissiveIntensity = THREE.MathUtils.lerp(
+                    child.material.emissiveIntensity,
+                    0.2 + positiveEnergy * 0.5,
+                    0.05
+                  );
+                }
+
+                // ROOTS GLOW
+                if (child.userData.isRoot) {
+                  child.material.emissiveIntensity = THREE.MathUtils.lerp(
+                    child.material.emissiveIntensity,
+                    0.3 + positiveEnergy * 0.7,
+                    0.05
+                  );
+                  child.rotation.y = Math.sin(time * 0.3) * 0.1;
+                }
+
+                // FLOWER BLOOM/WILT
+                if (child.userData.isFlowerGroup) {
+                  const targetBloom = Math.max(0.2, positiveEnergy);
+                  child.userData.bloomState = THREE.MathUtils.lerp(
+                    child.userData.bloomState,
+                    targetBloom,
+                    0.02
+                  );
+
+                  const flower = child.userData.flower;
+                  flower.scale.setScalar(child.userData.bloomState);
+                  flower.material.emissiveIntensity =
+                    child.userData.bloomState * 0.6;
+
+                  // Flowers turn to face camera
+                  child.lookAt(camera.position);
+                  child.rotation.x = 0;
+                  child.rotation.z = 0;
+
+                  // Sway gently
+                  child.rotation.y += Math.sin(time + child.position.x) * 0.001;
+                }
+
+                // MUSHROOM PULSE
+                if (child.userData.isMushroom) {
+                  const pulseIntensity =
+                    0.5 + Math.sin(time * 2 + child.userData.pulseOffset) * 0.3;
+                  child.userData.cap.material.emissiveIntensity =
+                    pulseIntensity * (0.3 + positiveEnergy * 0.5);
+                  child.scale.y =
+                    1 + Math.sin(time * 2 + child.userData.pulseOffset) * 0.05;
+                }
+
+                // BUTTERFLIES
+                if (child.userData.isButterfly) {
+                  const targetOpacity = Math.min(1, positiveEnergy * 1.5);
+                  child.userData.leftWing.material.opacity =
+                    THREE.MathUtils.lerp(
+                      child.userData.leftWing.material.opacity,
+                      targetOpacity,
+                      0.05
+                    );
+                  child.userData.rightWing.material.opacity =
+                    child.userData.leftWing.material.opacity;
+
+                  if (targetOpacity > 0.1) {
+                    // Flight pattern
+                    const path = child.userData.flightPath;
+                    child.position.x +=
+                      Math.sin(time * child.userData.speed + path.x) * 0.01;
+                    child.position.y +=
+                      Math.cos(time * child.userData.speed + path.y) * 0.008;
+                    child.position.z +=
+                      Math.sin(time * child.userData.speed + path.z) * 0.01;
+
+                    // Wing flapping
+                    child.userData.leftWing.rotation.y =
+                      Math.PI / 4 + Math.sin(time * 10) * 0.3;
+                    child.userData.rightWing.rotation.y =
+                      -Math.PI / 4 - Math.sin(time * 10) * 0.3;
+
+                    // Keep in bounds
+                    if (Math.abs(child.position.x) > 5)
+                      child.position.x *= 0.95;
+                    if (Math.abs(child.position.z) > 5)
+                      child.position.z *= 0.95;
+                    if (child.position.y < 0.5) child.position.y = 0.5;
+                    if (child.position.y > 3) child.position.y = 3;
+                  }
+                }
+
+                // FIREFLIES
+                if (child.userData.isFirefly) {
+                  const targetOpacity = Math.min(1, positiveEnergy * 1.2);
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    targetOpacity *
+                      (0.5 +
+                        Math.sin(time * 3 + child.userData.glowOffset) * 0.5),
+                    0.1
+                  );
+
+                  if (targetOpacity > 0.1) {
+                    const path = child.userData.flightPath;
+                    child.position.x += Math.cos(time * 0.5 + path.x) * 0.008;
+                    child.position.y += Math.sin(time * 0.7 + path.y) * 0.006;
+                    child.position.z += Math.sin(time * 0.5 + path.z) * 0.008;
+
+                    if (Math.abs(child.position.x) > 5) child.position.x *= 0.9;
+                    if (Math.abs(child.position.z) > 5) child.position.z *= 0.9;
+                    if (child.position.y < 0.5) child.position.y = 0.5;
+                    if (child.position.y > 3.5) child.position.y = 3.5;
+                  }
+                }
+
+                // POND COLOR
+                if (child.userData.isPond) {
+                  let targetColor = 0x4488cc; // Default blue
+                  if (hopeWeight > 0.3) {
+                    targetColor = 0x88ddff; // Bright hopeful blue
+                  } else if (peaceWeight > 0.3) {
+                    targetColor = 0x88ccaa; // Peaceful aqua
+                  } else if (sadnessWeight > 0.3) {
+                    targetColor = 0x445566; // Murky sad
+                  }
+
+                  child.material.color.lerp(new THREE.Color(targetColor), 0.02);
+                  child.material.emissive
+                    .copy(child.material.color)
+                    .multiplyScalar(0.5);
+                  child.material.opacity = 0.6 + positiveEnergy * 0.2;
+                }
+
+                // VINES GROW
+                if (child.userData.isVine) {
+                  const targetGrowth = Math.min(1, hopeWeight * 2);
+                  child.userData.growthProgress = THREE.MathUtils.lerp(
+                    child.userData.growthProgress,
+                    targetGrowth,
+                    0.01
+                  );
+                  child.material.opacity = child.userData.growthProgress * 0.8;
+                  child.scale.y = child.userData.growthProgress;
+                }
+
+                // PATH STONES LIGHT UP
+                if (child.userData.isPathStone) {
+                  const glowIntensity = positiveEnergy * 0.8;
+                  child.material.emissiveIntensity = THREE.MathUtils.lerp(
+                    child.material.emissiveIntensity,
+                    glowIntensity,
+                    0.05
+                  );
+                }
+
+                // SUN RAYS
+                if (child.userData.isSunRay) {
+                  const targetOpacity = Math.min(0.4, hopeWeight * 0.8);
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    targetOpacity,
+                    0.03
+                  );
+                  child.rotation.y += 0.002;
+                }
+              }
+
+              // === LIVING ROOM ANIMATIONS ===
+              if (currentRoom === "living") {
+                const happyWeight =
+                  (emotionBlend.HAPPY || 0) * currentIntensity;
+                const loveWeight = (emotionBlend.LOVE || 0) * currentIntensity;
+                const angerWeight =
+                  (emotionBlend.ANGER || 0) * currentIntensity;
+                const sadnessWeight =
+                  (emotionBlend.SADNESS || 0) * currentIntensity;
+                const fearWeight = (emotionBlend.FEAR || 0) * currentIntensity;
+                const anxietyWeight =
+                  (emotionBlend.ANXIETY || 0) * currentIntensity;
+                const excitementWeight =
+                  (emotionBlend.EXCITEMENT || 0) * currentIntensity;
+                const nostalgiaWeight =
+                  (emotionBlend.NOSTALGIA || 0) * currentIntensity;
+                const lonelinessWeight =
+                  (emotionBlend.LONELINESS || 0) * currentIntensity;
+                const griefWeight =
+                  (emotionBlend.GRIEF || 0) * currentIntensity;
+                const peaceWeight =
+                  (emotionBlend.PEACE || 0) * currentIntensity;
+
+                // === FIREPLACE DYNAMICS ===
+                if (child.userData.isFireParticles) {
+                  // Determine fire color
+                  let fireColor = 0xff6600; // default orange
+                  if (loveWeight > 0.3) fireColor = 0xff88aa; // pink
+                  else if (angerWeight > 0.3) fireColor = 0xff0000; // RED RAGE
+                  else if (sadnessWeight > 0.3) fireColor = 0x4488ff; // blue
+                  else if (fearWeight > 0.3)
+                    fireColor = 0x44ff88; // eerie green
+                  else if (happyWeight > 0.3) fireColor = 0xffaa00; // bright yellow
+
+                  child.material.color.lerp(new THREE.Color(fireColor), 0.05);
+
+                  // Fire size based on emotion intensity
+                  const fireIntensity = Math.max(
+                    0.3,
+                    1 - sadnessWeight * 0.7 + angerWeight * 0.8
+                  );
+                  child.material.size = THREE.MathUtils.lerp(
+                    child.material.size,
+                    0.15 * fireIntensity,
+                    0.05
+                  );
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    0.8 * fireIntensity,
+                    0.05
+                  );
+
+                  // Animate flames
+                  const pos = child.geometry.attributes.position.array;
+                  for (let i = 0; i < pos.length; i += 3) {
+                    pos[i + 1] += 0.02 * fireIntensity + Math.random() * 0.01;
+                    pos[i] +=
+                      (Math.random() - 0.5) * 0.01 * (1 + angerWeight * 2);
+                    if (pos[i + 1] > 1.2 * fireIntensity) {
+                      pos[i + 1] = 0.2;
+                      pos[i] = (Math.random() - 0.5) * 1.5;
+                    }
+                  }
+                  child.geometry.attributes.position.needsUpdate = true;
+
+                  // Update fireplace light
+                  if (roomLights.living.fireplace) {
+                    roomLights.living.fireplace.color.copy(
+                      child.material.color
+                    );
+                    roomLights.living.fireplace.intensity =
+                      1.5 * fireIntensity + Math.sin(time * 10) * 0.2;
+                  }
+                }
+
+                // EMBERS floating
+                if (child.userData.isEmbers) {
+                  const emberIntensity = happyWeight + angerWeight;
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    emberIntensity * 0.6,
+                    0.05
+                  );
+                  child.material.color.lerp(
+                    new THREE.Color(angerWeight > 0.3 ? 0xff0000 : 0xff6600),
+                    0.05
+                  );
+
+                  const pos = child.geometry.attributes.position.array;
+                  for (let i = 0; i < pos.length; i += 3) {
+                    pos[i + 1] += 0.01;
+                    pos[i] += Math.sin(time + i) * 0.005;
+                    pos[i + 2] += Math.cos(time + i) * 0.005;
+                    if (pos[i + 1] > 3) {
+                      pos[i + 1] = 0.5;
+                      pos[i] = (Math.random() - 0.5) * 8;
+                      pos[i + 2] = (Math.random() - 0.5) * 8;
+                    }
+                  }
+                  child.geometry.attributes.position.needsUpdate = true;
+                }
+
+                // SMOKE shapes
+                if (child.userData.isSmoke) {
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    Math.max(0.1, 0.3 - sadnessWeight * 0.2),
+                    0.05
+                  );
+
+                  const pos = child.geometry.attributes.position.array;
+                  for (let i = 0; i < pos.length; i += 3) {
+                    pos[i + 1] += 0.015;
+                    pos[i] += Math.sin(time * 0.5 + i) * 0.01;
+                    if (pos[i + 1] > 3.5) {
+                      pos[i + 1] = 1;
+                      pos[i] = (Math.random() - 0.5) * 1.5;
+                    }
+                  }
+                  child.geometry.attributes.position.needsUpdate = true;
+                }
+
+                // === COUCH DYNAMICS ===
+                if (child.userData.isCouch) {
+                  // Color shift
+                  let couchColor = child.userData.baseColor;
+                  if (loveWeight > 0.3) couchColor = 0xaa6655;
+                  else if (sadnessWeight > 0.3) couchColor = 0x6a4433;
+                  else if (angerWeight > 0.3) couchColor = 0x9a3313;
+
+                  child.material.color.lerp(new THREE.Color(couchColor), 0.02);
+
+                  // Sink/rise
+                  const verticalOffset =
+                    sadnessWeight * -0.15 + excitementWeight * 0.1;
+                  child.position.y = THREE.MathUtils.lerp(
+                    child.position.y,
+                    child.userData.originalPos.y + verticalOffset,
+                    0.02
+                  );
+
+                  // Shake during anger
+                  if (angerWeight > 0.3) {
+                    child.position.x =
+                      child.userData.originalPos.x +
+                      (Math.random() - 0.5) * angerWeight * 0.1;
+                    child.rotation.z =
+                      (Math.random() - 0.5) * angerWeight * 0.05;
+                  }
+                }
+
+                // THROW PILLOWS levitate
+                if (child.userData.isPillow) {
+                  const floatHeight =
+                    excitementWeight * 0.5 + happyWeight * 0.3;
+                  const targetY =
+                    child.userData.originalY +
+                    floatHeight +
+                    Math.sin(time * 2 + child.userData.floatOffset) *
+                      0.1 *
+                      floatHeight;
+                  child.position.y = THREE.MathUtils.lerp(
+                    child.position.y,
+                    targetY,
+                    0.05
+                  );
+                  child.rotation.y += 0.01 * floatHeight;
+                }
+
+                // INDENTATION (invisible person)
+                if (child.userData.isIndentation) {
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    lonelinessWeight * 0.6,
+                    0.05
+                  );
+                }
+
+                // === COFFEE TABLE ===
+                if (child.userData.isCoffeeTable) {
+                  // Surface color reflects emotions
+                  let tableColor = child.userData.baseColor;
+                  if (loveWeight > 0.3) tableColor = 0x6a4a4a;
+                  else if (angerWeight > 0.3) tableColor = 0x5a2a1a;
+
+                  child.material.color.lerp(new THREE.Color(tableColor), 0.02);
+                }
+
+                // COFFEE CUP steam
+                if (child.userData.isCup) {
+                  child.rotation.y += 0.005;
+                }
+
+                if (child.userData.isSteam) {
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    happyWeight * 0.5,
+                    0.05
+                  );
+
+                  const pos = child.geometry.attributes.position.array;
+                  for (let i = 0; i < pos.length; i += 3) {
+                    pos[i + 1] += 0.01;
+                    pos[i] += Math.sin(time * 2 + i) * 0.002;
+                    if (pos[i + 1] > 1) {
+                      pos[i + 1] = 0.5;
+                      pos[i] = -2.5 + (Math.random() - 0.5) * 0.1;
+                    }
+                  }
+                  child.geometry.attributes.position.needsUpdate = true;
+                }
+
+                // BOOKS on table
+                if (child.userData.isTableBook) {
+                  const floatHeight = (excitementWeight + anxietyWeight) * 0.3;
+                  const targetY =
+                    child.userData.originalY +
+                    floatHeight +
+                    Math.sin(time * 1.5 + child.userData.floatOffset) *
+                      0.05 *
+                      floatHeight;
+                  child.position.y = THREE.MathUtils.lerp(
+                    child.position.y,
+                    targetY,
+                    0.05
+                  );
+
+                  if (anxietyWeight > 0.3 && Math.random() < 0.01) {
+                    child.rotation.y += (Math.random() - 0.5) * 0.5;
+                  }
+                }
+
+                // REMOTE glows
+                if (child.userData.isRemote) {
+                  let remoteGlow = 0x000000;
+                  if (happyWeight > 0.3) remoteGlow = 0x00ff00;
+                  else if (angerWeight > 0.3) remoteGlow = 0xff0000;
+                  else if (sadnessWeight > 0.3) remoteGlow = 0x0000ff;
+
+                  child.material.emissive.lerp(
+                    new THREE.Color(remoteGlow),
+                    0.05
+                  );
+                  child.material.emissiveIntensity =
+                    Math.max(happyWeight, angerWeight, sadnessWeight) * 0.5;
+                }
+
+                // VASE FLOWERS bloom/wilt
+                if (child.userData.isVaseFlower) {
+                  const bloomFactor =
+                    happyWeight + loveWeight - sadnessWeight * 0.5;
+                  const targetScale = Math.max(
+                    0.2,
+                    child.userData.baseScale * (0.5 + bloomFactor * 0.8)
+                  );
+                  child.scale.setScalar(
+                    THREE.MathUtils.lerp(child.scale.x, targetScale, 0.02)
+                  );
+                  child.material.emissiveIntensity = THREE.MathUtils.lerp(
+                    child.material.emissiveIntensity,
+                    bloomFactor * 0.5,
+                    0.05
+                  );
+                }
+
+                // === TV SCREEN ===
+                if (child.userData.isTV) {
+                  let tvColor = child.userData.baseEmissive;
+                  if (happyWeight > 0.3) tvColor = 0xffaa00; // bright patterns
+                  else if (loveWeight > 0.3) tvColor = 0xff88aa; // warm hearts
+                  else if (angerWeight > 0.3)
+                    tvColor = 0xff0000; // red glitching
+                  else if (sadnessWeight > 0.3) tvColor = 0x4488ff; // blue rain
+                  else if (anxietyWeight > 0.3)
+                    tvColor = 0x88ff88; // flickering chaos
+                  else if (peaceWeight > 0.3) tvColor = 0x88ccff; // calm waves
+
+                  child.material.emissive.lerp(new THREE.Color(tvColor), 0.05);
+                  child.material.emissiveIntensity = THREE.MathUtils.lerp(
+                    child.material.emissiveIntensity,
+                    0.4 +
+                      Math.max(happyWeight, angerWeight, sadnessWeight) * 0.6,
+                    0.05
+                  );
+
+                  // Breathing pulse
+                  child.scale.set(
+                    1 + Math.sin(time * 2) * 0.02,
+                    1 + Math.sin(time * 2) * 0.02,
+                    1
+                  );
+                }
+
+                // === RUG ===
+                if (child.userData.isRug) {
+                  let rugColor = child.userData.baseColor;
+                  if (loveWeight > 0.3) rugColor = 0x8a5a4a;
+                  else if (angerWeight > 0.3) rugColor = 0x5a3a2a;
+                  else if (sadnessWeight > 0.3) rugColor = 0x4a3a2a;
+
+                  child.material.color.lerp(new THREE.Color(rugColor), 0.02);
+                }
+
+                // BURN MARKS on rug
+                if (child.userData.isBurn) {
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    angerWeight * 0.8,
+                    0.05
+                  );
+                }
+
+                // === PHOTOS ===
+                if (child.userData.isPhoto) {
+                  let photoColor = child.userData.baseColor;
+                  if (nostalgiaWeight > 0.3) photoColor = 0xaa8866; // sepia
+                  else if (sadnessWeight > 0.3)
+                    photoColor = 0x888888; // desaturated
+                  else if (lonelinessWeight > 0.3)
+                    photoColor = 0x666666; // fading
+                  else if (loveWeight > 0.3) photoColor = 0xddaa88; // warm glow
+
+                  child.material.color.lerp(new THREE.Color(photoColor), 0.02);
+                  child.material.emissiveIntensity = loveWeight * 0.4;
+                }
+
+                if (child.userData.isPhotoFrame) {
+                  // Frames tilt
+                  const tiltAmount =
+                    (angerWeight + sadnessWeight + griefWeight) * 0.3;
+                  child.rotation.z = THREE.MathUtils.lerp(
+                    child.rotation.z,
+                    (Math.random() - 0.5) * tiltAmount,
+                    0.02
+                  );
+                }
+
+                if (child.userData.isPhotoCrack) {
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    (angerWeight + griefWeight) * 0.6,
+                    0.05
+                  );
+                }
+
+                // === WINDOW ===
+                if (child.userData.isWindow) {
+                  let windowColor = child.userData.baseColor;
+                  if (happyWeight > 0.3) windowColor = 0xffeeaa; // sunny
+                  else if (loveWeight > 0.3) windowColor = 0xffcc88; // sunset
+                  else if (sadnessWeight > 0.3) windowColor = 0x4466aa; // rainy
+                  else if (angerWeight > 0.3) windowColor = 0x6644aa; // stormy
+                  else if (fearWeight > 0.3) windowColor = 0x222244; // dark fog
+                  else if (lonelinessWeight > 0.3) windowColor = 0x445566; // frost
+
+                  child.material.color.lerp(new THREE.Color(windowColor), 0.02);
+                  child.material.emissive
+                    .copy(child.material.color)
+                    .multiplyScalar(0.3);
+                  child.material.emissiveIntensity =
+                    Math.max(happyWeight, loveWeight) * 0.5;
+                }
+
+                if (child.userData.isCurtain) {
+                  // Curtains blow
+                  child.position.x = 5.82 + Math.sin(time * 0.8) * 0.05;
+                  child.rotation.y = Math.sin(time * 1.2) * 0.08;
+                }
+
+                // === PAINTINGS ===
+                if (child.userData.isPainting) {
+                  // Colors shift
+                  let paintColor = child.userData.baseColor;
+                  if (angerWeight > 0.3) {
+                    paintColor =
+                      child.userData.baseColor === 0xff6b6b
+                        ? 0xff0000
+                        : 0x8800ff;
+                  } else if (sadnessWeight > 0.3) {
+                    paintColor = 0x6666aa;
+                  } else if (loveWeight > 0.3) {
+                    paintColor = 0xffaacc;
+                  } else if (happyWeight > 0.3) {
+                    paintColor = 0xffcc66;
+                  }
+
+                  child.material.color.lerp(new THREE.Color(paintColor), 0.03);
+                  child.material.emissiveIntensity = THREE.MathUtils.lerp(
+                    child.material.emissiveIntensity,
+                    0.2 + Math.max(happyWeight, angerWeight, loveWeight) * 0.5,
+                    0.05
+                  );
+
+                  // Canvas warps (bulges)
+                  child.scale.z =
+                    1 +
+                    angerWeight * 0.5 +
+                    Math.sin(time * 2) * angerWeight * 0.2;
+
+                  // Paintings fall or melt
+                  if (angerWeight > 0.7 || griefWeight > 0.7) {
+                    child.rotation.z = THREE.MathUtils.lerp(
+                      child.rotation.z,
+                      (Math.random() - 0.5) * 0.5,
+                      0.02
+                    );
+                    child.position.z = THREE.MathUtils.lerp(
+                      child.position.z,
+                      child.userData.originalZ + 0.5,
+                      0.02
+                    );
+                  } else if (sadnessWeight > 0.5) {
+                    // Melt effect
+                    child.scale.y = THREE.MathUtils.lerp(
+                      child.scale.y,
+                      0.7,
+                      0.01
+                    );
+                  }
+                }
+
+                // === WALL CRACKS ===
+                if (child.userData.isWallCrack) {
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    (angerWeight + griefWeight) * 0.7,
+                    0.05
+                  );
+                  child.scale.y = THREE.MathUtils.lerp(
+                    child.scale.y,
+                    1 + (angerWeight + griefWeight) * 0.5,
+                    0.02
+                  );
+                }
+
+                // === CLOCK ===
+                if (child.userData.isClockHand) {
+                  let speed = 1;
+                  if (nostalgiaWeight > 0.3) speed = -0.5; // backward
+                  else if (anxietyWeight > 0.3) speed = 3; // fast
+                  else if (griefWeight > 0.5) speed = 0; // stopped
+
+                  child.userData.speed = THREE.MathUtils.lerp(
+                    child.userData.speed,
+                    speed,
+                    0.05
+                  );
+
+                  if (child.userData.speed !== 0) {
+                    child.rotation.z -=
+                      (child.userData.isHourHand ? 0.01 : 0.05) *
+                      child.userData.speed *
+                      delta;
+                  }
+                }
+
+                // === PLANT LEAVES ===
+                if (child.userData.isPlantLeaf) {
+                  const growthFactor =
+                    (happyWeight + loveWeight) * 0.5 + 1 - sadnessWeight * 0.3;
+                  child.scale.y = THREE.MathUtils.lerp(
+                    child.scale.y,
+                    child.userData.baseScale.y * growthFactor,
+                    0.02
+                  );
+                  child.rotation.z = Math.sin(time * 0.5) * 0.05;
+                }
+
+                // === FLOATING PARTICLES ===
+                if (child.userData.isRoomParticles) {
+                  let particleColor = 0xffffff;
+                  let particleOpacity = 0;
+
+                  if (happyWeight > 0.3) {
+                    particleColor = 0xffffaa;
+                    particleOpacity = happyWeight * 0.6;
+                  } else if (loveWeight > 0.3) {
+                    particleColor = 0xffaaff;
+                    particleOpacity = loveWeight * 0.5;
+                  } else if (angerWeight > 0.3) {
+                    particleColor = 0xff6600;
+                    particleOpacity = angerWeight * 0.4;
+                  } else if (sadnessWeight > 0.3) {
+                    particleColor = 0x6688aa;
+                    particleOpacity = sadnessWeight * 0.3;
+                  }
+
+                  child.material.color.lerp(
+                    new THREE.Color(particleColor),
+                    0.05
+                  );
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    particleOpacity,
+                    0.05
+                  );
+
+                  if (particleOpacity > 0.1) {
+                    const pos = child.geometry.attributes.position.array;
+                    for (let i = 0; i < pos.length; i += 3) {
+                      if (sadnessWeight > 0.3) {
+                        pos[i + 1] -= 0.01; // Fall
+                      } else {
+                        pos[i + 1] += 0.005; // Rise
+                      }
+                      pos[i] += Math.sin(time + i) * 0.003;
+                      pos[i + 2] += Math.cos(time + i) * 0.003;
+
+                      if (sadnessWeight > 0.3) {
+                        if (pos[i + 1] < 0) pos[i + 1] = 3.5;
+                      } else {
+                        if (pos[i + 1] > 3.5) pos[i + 1] = 0;
+                      }
+                    }
+                    child.geometry.attributes.position.needsUpdate = true;
+                  }
+                }
+              }
+
+              // === ATTIC ANIMATIONS ===
+              if (currentRoom === "attic") {
+                const fearWeight = (emotionBlend.FEAR || 0) * currentIntensity;
+                const anxietyWeight =
+                  (emotionBlend.ANXIETY || 0) * currentIntensity;
+                const guiltWeight =
+                  (emotionBlend.GUILT || 0) * currentIntensity;
+                const terrorLevel = fearWeight + anxietyWeight + guiltWeight;
+
+                // SHAKING BOXES
+                if (child.userData.isBox) {
+                  child.userData.shakeIntensity = THREE.MathUtils.lerp(
+                    child.userData.shakeIntensity,
+                    terrorLevel * 0.15,
+                    0.1
+                  );
+
+                  if (child.userData.shakeIntensity > 0.01) {
+                    child.position.x =
+                      child.userData.originalPos.x +
+                      (Math.random() - 0.5) * child.userData.shakeIntensity;
+                    child.position.y =
+                      child.userData.originalPos.y +
+                      (Math.random() - 0.5) * child.userData.shakeIntensity;
+                    child.position.z =
+                      child.userData.originalPos.z +
+                      (Math.random() - 0.5) * child.userData.shakeIntensity;
+                    child.rotation.z =
+                      child.userData.originalRot.z +
+                      (Math.random() - 0.5) * child.userData.shakeIntensity;
+                  }
+                }
+
+                // ROCKING CHAIR
+                if (child.userData.isRockingChair) {
+                  child.userData.rockSpeed = THREE.MathUtils.lerp(
+                    child.userData.rockSpeed,
+                    terrorLevel * 3,
+                    0.05
+                  );
+                  child.rotation.x =
+                    Math.sin(time * child.userData.rockSpeed) * 0.15;
+                }
+
+                // HANGING BULB
+                if (child.userData.isHangingBulb) {
+                  child.userData.swingIntensity = THREE.MathUtils.lerp(
+                    child.userData.swingIntensity,
+                    terrorLevel * 0.5,
+                    0.05
+                  );
+                  child.rotation.z =
+                    Math.sin(time * 2) * child.userData.swingIntensity;
+
+                  // Flicker the bulb
+                  const flickerChance = terrorLevel * 0.3;
+                  if (Math.random() < flickerChance) {
+                    child.userData.bulb.material.emissiveIntensity =
+                      Math.random() * 0.8;
+                  } else {
+                    child.userData.bulb.material.emissiveIntensity =
+                      THREE.MathUtils.lerp(
+                        child.userData.bulb.material.emissiveIntensity,
+                        0.8,
+                        0.1
+                      );
+                  }
+                }
+
+                // BULB LIGHT FLICKER
+                if (child.userData.isBulbLight) {
+                  if (terrorLevel > 0.3 && Math.random() < 0.1) {
+                    child.intensity =
+                      Math.random() * child.userData.baseIntensity;
+                  } else {
+                    child.intensity = THREE.MathUtils.lerp(
+                      child.intensity,
+                      child.userData.baseIntensity * (1 - terrorLevel * 0.5),
+                      0.1
+                    );
+                  }
+                }
+
+                // MANNEQUIN TURNS
+                if (child.userData.isMannequin) {
+                  const targetRot = terrorLevel > 0.3 ? Math.PI : 0;
+                  child.userData.targetRotation = THREE.MathUtils.lerp(
+                    child.userData.targetRotation,
+                    targetRot,
+                    0.005
+                  );
+                  child.rotation.y = child.userData.targetRotation;
+                }
+
+                // GLOWING EYES
+                if (child.userData.isEyes) {
+                  const targetOpacity = Math.min(0.9, terrorLevel * 1.2);
+                  child.userData.leftEye.material.opacity =
+                    THREE.MathUtils.lerp(
+                      child.userData.leftEye.material.opacity,
+                      targetOpacity *
+                        (0.7 +
+                          Math.sin(time * 3 + child.userData.blinkOffset) *
+                            0.3),
+                      0.1
+                    );
+                  child.userData.rightEye.material.opacity =
+                    child.userData.leftEye.material.opacity;
+
+                  // Eyes look at camera
+                  child.lookAt(camera.position);
+                }
+
+                // SHADOW CREATURES CRAWL
+                if (child.userData.isShadow) {
+                  const targetOpacity = Math.min(0.7, terrorLevel * 0.9);
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    targetOpacity,
+                    0.05
+                  );
+
+                  // Crawl along walls
+                  if (targetOpacity > 0.1) {
+                    const crawlOffset =
+                      Math.sin(time + child.userData.crawlOffset) * 2;
+                    child.position.y = child.userData.basePos.y + crawlOffset;
+                    child.scale.y =
+                      1 + Math.sin(time * 2 + child.userData.crawlOffset) * 0.3;
+                  }
+                }
+
+                // COBWEBS GROW
+                if (child.userData.isCobweb) {
+                  const targetGrowth = Math.min(1, terrorLevel * 1.5);
+                  child.userData.growthProgress = THREE.MathUtils.lerp(
+                    child.userData.growthProgress,
+                    targetGrowth,
+                    0.01
+                  );
+                  child.material.opacity = child.userData.growthProgress * 0.4;
+                  child.scale.setScalar(child.userData.growthProgress);
+                }
+
+                // REACHING HANDS
+                if (child.userData.isHand) {
+                  const targetOpacity = Math.min(0.8, terrorLevel * 1.3);
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    targetOpacity,
+                    0.05
+                  );
+
+                  if (targetOpacity > 0.1) {
+                    const reach =
+                      Math.sin(time * 0.8 + child.userData.reachOffset) * 0.5;
+                    child.position.y = child.userData.basePos.y + reach;
+                    child.rotation.z = Math.PI / 4 + reach * 0.5;
+                  }
+                }
+
+                // FLOOR CRACKS SPREAD
+                if (child.userData.isCrack) {
+                  const targetSpread = Math.min(1, terrorLevel * 1.2);
+                  child.userData.spreadProgress = THREE.MathUtils.lerp(
+                    child.userData.spreadProgress,
+                    targetSpread,
+                    0.02
+                  );
+                  child.material.opacity = child.userData.spreadProgress * 0.6;
+                  child.scale.x = child.userData.spreadProgress;
+                }
+
+                // ATTIC DUST
+                if (child.userData.isAtticDust) {
+                  child.material.opacity = THREE.MathUtils.lerp(
+                    child.material.opacity,
+                    terrorLevel * 0.3,
+                    0.05
+                  );
+
+                  // Slowly drift
+                  const pos = child.geometry.attributes.position.array;
+                  for (let i = 0; i < pos.length; i += 3) {
+                    pos[i + 1] -= 0.002;
+                    pos[i] += Math.sin(time * 0.3 + i) * 0.002;
+                    if (pos[i + 1] < 0) pos[i + 1] = 3.5;
+                  }
+                  child.geometry.attributes.position.needsUpdate = true;
+                }
+
+                // SLAMMING DOOR
+                if (child.userData.isDoor) {
+                  child.userData.slamTimer += delta;
+
+                  // Slam every few seconds when fear is high
+                  if (terrorLevel > 0.5 && child.userData.slamTimer > 3) {
+                    if (!child.userData.isOpen) {
+                      // Open
+                      child.rotation.y = Math.PI / 2;
+                      child.userData.isOpen = true;
+                    } else {
+                      // SLAM!
+                      child.rotation.y = 0;
+                      child.userData.isOpen = false;
+                      child.userData.slamTimer = 0;
+                    }
+                  }
+                }
+              }
+
+              // Plant gentle sway (old code, keep for other rooms)
+              if (child.userData.isPlant && currentRoom !== "garden") {
+                child.rotation.z = Math.sin(time * 0.5) * 0.05;
+              }
+
+              // Flower glow pulse (old code, keep for other rooms)
+              if (child.userData.isFlower && currentRoom !== "garden") {
+                child.material.emissiveIntensity =
+                  0.3 + Math.sin(time * 2) * 0.2;
+              }
+
+              // Books subtle float (for contemplation)
+              if (child.userData.isBook && emotionBlend.CONTEMPLATION) {
+                child.position.y +=
+                  Math.sin(time * 0.5 + child.position.x) * 0.001;
               }
             });
           }
@@ -1015,7 +3332,7 @@
             camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, 0, 0.1);
           }
 
-          // Animate particles
+          // Animate global particles
           if (particles.rain.material.opacity > 0) {
             const pos = particles.rain.geometry.attributes.position.array;
             for (let i = 1; i < pos.length; i += 3) {
